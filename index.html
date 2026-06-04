@@ -12,6 +12,8 @@
       font-family: Arial, sans-serif;
       background: #000;
       overflow: hidden;
+      pointer-events: none;
+      user-select: none;
     }
 
     .wrapper {
@@ -23,7 +25,7 @@
     .slider {
       position: relative;
       width: 100%;
-      height: min(65vh, 400px);
+      height: 100vh;
       border-radius: 0;
       overflow: hidden;
       background: transparent !important;
@@ -44,7 +46,7 @@
 
     .widget-slide.active {
       opacity: 1;
-      pointer-events: auto;
+      pointer-events: none;
       transform: scale(1);
     }
 
