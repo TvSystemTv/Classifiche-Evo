@@ -319,7 +319,7 @@
       if (progress < 1) {
         scrollAnimId = requestAnimationFrame(step);
       } else {
-        widget.scrollTop = maxScroll + 5;
+        widget.scrollTop = maxScroll;
         pauseTimeoutId = setTimeout(nextSlide, cfg.after);
       }
     }
