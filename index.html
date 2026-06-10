@@ -58,7 +58,7 @@
       overflow-y: auto;
       overflow-x: hidden;
       box-sizing: border-box;
-      padding-bottom: 50px;
+      padding-bottom: 0px;
       font-family: 'Roboto', Arial, sans-serif;
       font-size: 12px;
     }
@@ -313,7 +313,7 @@
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / cfg.duration, 1);
       const eased = easeInOutQuad(progress);
-      const maxScroll = widget.scrollHeight - widget.clientHeight;
+      const maxScroll = widget.scrollHeight - widget.clientHeight - 50;
       widget.scrollTop = maxScroll * eased;
 
       if (progress < 1) {
