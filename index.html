@@ -313,7 +313,7 @@
       const elapsed = now - startTime;
       const progress = Math.min(elapsed / cfg.duration, 1);
       const eased = easeInOutQuad(progress);
-      const maxScroll = widget.scrollHeight - widget.clientHeight - 50;
+      const maxScroll = widget.scrollHeight - widget.clientHeight - 30;
       widget.scrollTop = maxScroll * eased;
 
       if (progress < 1) {
