@@ -3,348 +3,590 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>FIFA World Cup 2026 - Wallchart</title>
+<title>FIFA World Cup 2026</title>
 <style>
-  * { box-sizing: border-box; }
+  /* ===================== RESET & BASE ===================== */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg:       #080810;
+    --bg2:      #10101e;
+    --bg3:      #181828;
+    --gold:     #c9a84c;
+    --gold2:    #e8c97a;
+    --teal:     #00c2cb;
+    --white:    #f0f0f0;
+    --muted:    #6b6b8a;
+    --elim:     #2a2a3a;
+    --radius:   10px;
+    --font:     'Roboto', Arial, sans-serif;
+  }
+
+  html, body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+
   body {
-    margin: 0;
-    padding: 16px;
-    font-family: 'Roboto', Arial, sans-serif;
-    background: linear-gradient(135deg, #6e0e23 0%, #8a1230 50%, #6e0e23 100%);
-    color: #fff;
-    overflow-x: hidden;
+    font-family: var(--font);
+    background: var(--bg);
+    color: var(--white);
     pointer-events: none;
     user-select: none;
   }
 
-  .wc-title {
-    text-align: center;
-    font-size: 22px;
-    font-weight: 800;
-    letter-spacing: 1px;
-    margin-bottom: 4px;
-    text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  /* ===================== SCROLL CONTAINER ===================== */
+  #scroll-root {
+    width: 100%;
+    height: 100vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: none;
+  }
+  #scroll-root::-webkit-scrollbar { display: none; }
+
+  /* ===================== HEADER ===================== */
+  .wc-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 18px 16px 10px;
+    background: linear-gradient(180deg, #0f0f1f 0%, var(--bg) 100%);
+    border-bottom: 1px solid rgba(201,168,76,0.2);
   }
 
-  .wc-subtitle {
-    text-align: center;
-    font-size: 12px;
-    opacity: 0.8;
-    margin-bottom: 16px;
-  }
-
-  .wc-stage-label {
-    text-align: center;
+  .wc-wordmark {
     font-size: 11px;
     font-weight: 700;
+    letter-spacing: 5px;
     text-transform: uppercase;
-    letter-spacing: 2px;
-    color: #ffd166;
-    margin: 18px 0 8px;
+    color: var(--gold);
+    opacity: 0.85;
   }
 
-  /* ---- GRUPPI ---- */
+  .wc-title {
+    font-size: 28px;
+    font-weight: 900;
+    letter-spacing: -0.5px;
+    color: var(--white);
+    line-height: 1;
+    margin-top: 2px;
+  }
+
+  .wc-updated {
+    font-size: 10px;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  /* ===================== SECTION LABELS ===================== */
+  .section-label {
+    text-align: center;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    color: var(--gold);
+    padding: 16px 0 10px;
+  }
+
+  /* ===================== GIRONI GRID ===================== */
+  .groups-section {
+    padding: 0 12px 8px;
+  }
+
   .groups-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-    gap: 10px;
-    margin-bottom: 10px;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
   }
 
   .group-card {
-    background: rgba(255,255,255,0.07);
-    border: 1px solid rgba(255,255,255,0.15);
-    border-radius: 8px;
+    background: var(--bg2);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: var(--radius);
     overflow: hidden;
   }
 
   .group-card-header {
-    background: rgba(0,0,0,0.25);
-    font-size: 11px;
-    font-weight: 700;
+    background: rgba(201,168,76,0.1);
+    border-bottom: 1px solid rgba(201,168,76,0.2);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--gold2);
     padding: 5px 8px;
-    letter-spacing: 0.5px;
   }
 
   .group-team-row {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 4px 8px;
-    font-size: 11px;
-    border-top: 1px solid rgba(255,255,255,0.08);
+    padding: 5px 8px;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    gap: 6px;
   }
+  .group-team-row:last-child { border-bottom: none; }
 
-  .group-team-row .team-info {
+  .group-team-row .left {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 7px;
     overflow: hidden;
+    flex: 1;
   }
 
-  .group-team-row img {
-    width: 16px;
-    height: 12px;
-    object-fit: cover;
-    border-radius: 2px;
+  /* Bandiera circolare */
+  .flag-circle {
+    width: 22px;
+    height: 22px;
+    border-radius: 50%;
+    overflow: hidden;
     flex-shrink: 0;
-  }
-
-  .group-team-row .team-name {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 110px;
-  }
-
-  .group-team-row .pts {
-    font-weight: 700;
-    color: #ffd166;
-  }
-
-  /* ---- BRACKET ---- */
-  .bracket-wrap {
+    background: var(--bg3);
     display: flex;
-    flex-direction: column;
     align-items: center;
-    gap: 6px;
-    margin: 10px 0 24px;
-  }
-
-  .bracket-round-title {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: #ffd166;
-    opacity: 0.9;
-    margin-top: 10px;
-  }
-
-  .bracket-row {
-    display: flex;
-    flex-wrap: wrap;
     justify-content: center;
-    gap: 8px;
-    width: 100%;
+    border: 1.5px solid rgba(255,255,255,0.1);
   }
-
-  .match-box {
-    background: rgba(255,255,255,0.09);
-    border: 1px solid rgba(255,255,255,0.18);
-    border-radius: 6px;
-    width: 150px;
-    overflow: hidden;
-    flex-shrink: 0;
-  }
-
-  .match-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 4px 6px;
-    font-size: 10.5px;
-    gap: 4px;
-  }
-
-  .match-row + .match-row {
-    border-top: 1px solid rgba(255,255,255,0.12);
-  }
-
-  .match-row.winner {
-    background: rgba(255,209,102,0.18);
-    font-weight: 700;
-  }
-
-  .match-row .side {
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    overflow: hidden;
-  }
-
-  .match-row img {
-    width: 14px;
-    height: 10px;
+  .flag-circle img {
+    width: 110%;
+    height: 110%;
     object-fit: cover;
-    border-radius: 2px;
-    flex-shrink: 0;
+  }
+  .flag-circle.qualified {
+    border-color: var(--gold);
+    box-shadow: 0 0 5px rgba(201,168,76,0.4);
+  }
+  .flag-circle.eliminated {
+    opacity: 0.35;
+    filter: grayscale(1);
+  }
+  .flag-circle.placeholder-circle {
+    background: var(--bg3);
   }
 
-  .match-row .side-name {
+  .group-team-name {
+    font-size: 11px;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 78px;
-    font-size: 10px;
+    color: var(--white);
   }
 
-  .match-row .placeholder-name {
-    font-style: italic;
-    opacity: 0.6;
-    font-size: 9px;
-  }
-
-  .match-row .score {
+  .group-pts {
+    font-size: 12px;
     font-weight: 700;
-    min-width: 14px;
+    color: var(--gold);
+    min-width: 16px;
     text-align: right;
+    flex-shrink: 0;
   }
 
-  /* ---- TROFEO CENTRALE ---- */
-  .trophy-zone {
+  .qual-badge {
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--teal);
+    flex-shrink: 0;
+    box-shadow: 0 0 4px var(--teal);
+  }
+
+  /* ===================== BRACKET SECTION ===================== */
+  .bracket-section {
+    padding: 0 12px 24px;
+  }
+
+  /* Wrapper orizzontale: R32 | R16 | QF | SF | FINAL | SF | QF | R16 | R32 */
+  .bracket-outer {
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    min-width: 0;
+    width: 100%;
+  }
+
+  .bracket-col {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+    position: relative;
+  }
+
+  .bracket-col-label {
+    text-align: center;
+    font-size: 8px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding-bottom: 6px;
+    white-space: nowrap;
+  }
+
+  .bracket-col-matches {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-around;
+    flex: 1;
+    gap: 4px;
+    padding: 0 3px;
+  }
+
+  /* Singola match card nel bracket */
+  .b-match {
+    background: var(--bg2);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .b-row {
+    display: flex;
+    align-items: center;
+    padding: 4px 6px;
+    gap: 5px;
+    min-height: 26px;
+  }
+  .b-row + .b-row {
+    border-top: 1px solid rgba(255,255,255,0.06);
+  }
+  .b-row.winner {
+    background: rgba(201,168,76,0.12);
+  }
+  .b-row.eliminated-row {
+    opacity: 0.4;
+  }
+
+  .b-flag {
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+    background: var(--bg3);
+    border: 1px solid rgba(255,255,255,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .b-flag img {
+    width: 120%;
+    height: 120%;
+    object-fit: cover;
+  }
+  .b-flag.winner-flag {
+    border-color: var(--gold);
+    box-shadow: 0 0 4px rgba(201,168,76,0.5);
+  }
+  .b-flag.placeholder-flag {
+    opacity: 0.3;
+  }
+
+  .b-name {
+    font-size: 9.5px;
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--white);
+    font-weight: 500;
+  }
+  .b-name.placeholder-txt {
+    color: var(--muted);
+    font-style: italic;
+    font-size: 8.5px;
+    font-weight: 400;
+  }
+
+  .b-score {
+    font-size: 10px;
+    font-weight: 700;
+    min-width: 12px;
+    text-align: right;
+    color: var(--gold2);
+    flex-shrink: 0;
+  }
+
+  /* Connettori SVG tra colonne */
+  .bracket-connector {
+    width: 12px;
+    flex-shrink: 0;
+    position: relative;
+    align-self: stretch;
+  }
+
+  /* COLONNA TROFEO al centro */
+  .bracket-trophy-col {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 18px 0;
-  }
-
-  .trophy-zone img {
+    justify-content: center;
     width: 90px;
-    height: auto;
-    filter: drop-shadow(0 4px 14px rgba(255,209,102,0.5));
+    flex-shrink: 0;
+    gap: 8px;
   }
 
-  .final-box {
-    margin-top: 10px;
-    width: 190px;
+  .trophy-img {
+    width: 52px;
+    filter: drop-shadow(0 0 12px rgba(201,168,76,0.6));
   }
 
-  .final-box .match-box {
-    width: 100%;
-    border-color: #ffd166;
+  .trophy-label {
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    text-align: center;
   }
 
+  .b-match.final-match {
+    border-color: rgba(201,168,76,0.4);
+    box-shadow: 0 0 10px rgba(201,168,76,0.15);
+  }
+
+  /* ===================== FOOTER ===================== */
   .wc-footer {
     text-align: center;
-    font-size: 10px;
-    color: rgba(255,255,255,0.6);
-    margin-top: 10px;
+    font-size: 9px;
+    color: var(--muted);
+    padding: 8px 0 16px;
   }
 
-  .error {
-    text-align: center;
-    padding: 30px;
+  /* ===================== ERROR ===================== */
+  .error-screen {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    gap: 12px;
+    color: var(--muted);
     font-size: 13px;
-    color: #ffb4b4;
+    text-align: center;
+    padding: 24px;
+  }
+  .error-screen .err-title {
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--white);
   }
 </style>
 </head>
 <body>
 
-<div class="wc-title">FIFA WORLD CUP 2026</div>
-<div class="wc-subtitle" id="wc-updated">Caricamento dati...</div>
-
-<div id="wc-content"></div>
+<div id="scroll-root">
+  <div id="app"></div>
+</div>
 
 <script>
-  const FLAG_FALLBACK = "https://flagcdn.com/w40/un.png";
+/* ===================== UTILS ===================== */
+const FLAG_FB = "https://flagcdn.com/w40/un.png";
 
-  function flagImg(team, cls) {
-    if (!team) return `<span class="${cls} placeholder-name">TBD</span>`;
-    if (team.placeholder && !team.code) {
-      return `<span class="${cls} placeholder-name">${team.placeholder}</span>`;
-    }
-    return `
-      <img src="${team.flag || FLAG_FALLBACK}" onerror="this.src='${FLAG_FALLBACK}'" alt="${team.code || ''}" />
-      <span class="${cls}">${team.name}</span>
-    `;
-  }
+function flagUrl(team) {
+  if (!team || (!team.name && !team.code)) return FLAG_FB;
+  return team.flag || FLAG_FB;
+}
 
-  function renderGroups(groups) {
-    if (!groups || !groups.length) return '';
-    const cards = groups.map(g => {
-      const rows = g.teams.map(t => `
+function teamName(team) {
+  if (!team) return null;
+  return team.name || null;
+}
+
+function placeholder(team) {
+  if (!team) return 'TBD';
+  if (team.name) return null;
+  return team.placeholder || 'TBD';
+}
+
+function fmtDatetime(iso) {
+  if (!iso) return '';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString('it-IT', { day:'2-digit', month:'2-digit' });
+  } catch(e) { return ''; }
+}
+
+/* ===================== RENDER GIRONI ===================== */
+function qualifiedTeams(groups) {
+  // Le prime 2 di ogni gruppo sono qualificate (+ 8 migliori terze)
+  // Semplificazione: mark top-2 di ogni girone come qualified
+  const qualified = new Set();
+  groups.forEach(g => {
+    g.teams.slice(0, 2).forEach(t => { if (t.name) qualified.add(t.name); });
+  });
+  return qualified;
+}
+
+function renderGroups(groups) {
+  const qualified = qualifiedTeams(groups);
+
+  // 12 gruppi in griglia 4 colonne = 3 righe
+  const cards = groups.map(g => {
+    const rows = g.teams.map((t, i) => {
+      const isQ = qualified.has(t.name);
+      const isE = t.name && !isQ && t.played > 0;
+      const flagClass = t.name
+        ? (isQ ? 'flag-circle qualified' : 'flag-circle eliminated')
+        : 'flag-circle placeholder-circle';
+      const dot = isQ ? '<span class="qual-badge"></span>' : '';
+      return `
         <div class="group-team-row">
-          <div class="team-info">
-            <img src="${t.flag || FLAG_FALLBACK}" onerror="this.src='${FLAG_FALLBACK}'" alt="${t.code || ''}" />
-            <span class="team-name">${t.name}</span>
+          <div class="left">
+            <div class="${flagClass}">
+              ${t.name ? `<img src="${t.flag || FLAG_FB}" onerror="this.src='${FLAG_FB}'" alt="${t.code||''}" />` : ''}
+            </div>
+            <span class="group-team-name">${t.name || (t.placeholder || '—')}</span>
           </div>
-          <span class="pts">${t.points ?? 0}</span>
-        </div>
-      `).join('');
-      return `
-        <div class="group-card">
-          <div class="group-card-header">${g.name}</div>
-          ${rows}
-        </div>
-      `;
+          ${dot}
+          <span class="group-pts">${t.points ?? 0}</span>
+        </div>`;
     }).join('');
+
     return `
-      <div class="wc-stage-label">Fase a Gironi</div>
+      <div class="group-card">
+        <div class="group-card-header">${g.name}</div>
+        ${rows}
+      </div>`;
+  }).join('');
+
+  return `
+    <div class="section-label">Fase a Gironi</div>
+    <div class="groups-section">
       <div class="groups-grid">${cards}</div>
-    `;
+    </div>`;
+}
+
+/* ===================== RENDER SINGOLA MATCH BOX ===================== */
+function renderBMatch(m, isFinal = false) {
+  if (!m) {
+    return `<div class="b-match${isFinal?' final-match':''}">
+      <div class="b-row"><div class="b-flag placeholder-flag"></div><span class="b-name placeholder-txt">TBD</span></div>
+      <div class="b-row"><div class="b-flag placeholder-flag"></div><span class="b-name placeholder-txt">TBD</span></div>
+    </div>`;
   }
 
-  function renderMatch(m) {
-    if (!m) {
-      return `
-        <div class="match-box">
-          <div class="match-row"><span class="side placeholder-name">TBD</span></div>
-          <div class="match-row"><span class="side placeholder-name">TBD</span></div>
-        </div>`;
-    }
-    const homeWin = m.winner && m.home && m.winner === m.home.name;
-    const awayWin = m.winner && m.away && m.winner === m.away.name;
+  function side(team, score, isWinner, isElim) {
+    const ph = placeholder(team);
+    const name = teamName(team);
+    const rowClass = isWinner ? 'b-row winner' : (isElim ? 'b-row eliminated-row' : 'b-row');
+    const flagClass = isWinner ? 'b-flag winner-flag' : (ph ? 'b-flag placeholder-flag' : 'b-flag');
+    const nameClass = ph ? 'b-name placeholder-txt' : 'b-name';
+    const scoreStr = (score !== null && score !== undefined) ? score : '';
     return `
-      <div class="match-box">
-        <div class="match-row ${homeWin ? 'winner' : ''}">
-          <span class="side">${flagImg(m.home, 'side-name')}</span>
-          <span class="score">${m.homeScore ?? ''}</span>
+      <div class="${rowClass}">
+        <div class="${flagClass}">
+          ${name ? `<img src="${flagUrl(team)}" onerror="this.src='${FLAG_FB}'" alt="${team.code||''}" />` : ''}
         </div>
-        <div class="match-row ${awayWin ? 'winner' : ''}">
-          <span class="side">${flagImg(m.away, 'side-name')}</span>
-          <span class="score">${m.awayScore ?? ''}</span>
-        </div>
+        <span class="${nameClass}">${ph || name}</span>
+        <span class="b-score">${scoreStr}</span>
       </div>`;
   }
 
-  function renderRound(label, matches) {
-    if (!matches || !matches.length) return '';
+  const homeWin = m.winner && m.home?.name && m.winner === m.home.name;
+  const awayWin = m.winner && m.away?.name && m.winner === m.away.name;
+  const homeElim = !homeWin && awayWin;
+  const awayElim = !awayWin && homeWin;
+
+  return `<div class="b-match${isFinal?' final-match':''}">
+    ${side(m.home, m.homeScore, homeWin, homeElim)}
+    ${side(m.away, m.awayScore, awayWin, awayElim)}
+  </div>`;
+}
+
+/* ===================== RENDER BRACKET ===================== */
+function renderBracket(bracket) {
+  const r32 = bracket.round_of_32 || [];
+  const r16 = bracket.round_of_16 || [];
+  const qf  = bracket.quarter_finals || [];
+  const sf  = bracket.semi_finals || [];
+  const fin = bracket.final;
+
+  // Split bracket in metà sinistra e destra (8 match R32 ciascuna)
+  // L'ordine deve rispecchiare l'albero: abbiniamo R32→R16→QF→SF→Final
+  // Sinistra: r32[0..7], r16[0..3], qf[0..1], sf[0]
+  // Destra:   r32[8..15], r16[4..7], qf[2..3], sf[1]
+  const r32L = r32.slice(0, 8);
+  const r32R = r32.slice(8, 16);
+  const r16L = r16.slice(0, 4);
+  const r16R = r16.slice(4, 8);
+  const qfL  = qf.slice(0, 2);
+  const qfR  = qf.slice(2, 4);
+  const sfL  = sf[0] || null;
+  const sfR  = sf[1] || null;
+
+  function col(label, matches, isFinal = false) {
+    const boxes = matches.map(m => renderBMatch(m, isFinal)).join('');
     return `
-      <div class="bracket-round-title">${label}</div>
-      <div class="bracket-row">${matches.map(renderMatch).join('')}</div>
-    `;
+      <div class="bracket-col">
+        <div class="bracket-col-label">${label}</div>
+        <div class="bracket-col-matches">${boxes}</div>
+      </div>`;
   }
 
-  function renderBracket(bracket) {
-    if (!bracket) return '';
-    return `
-      <div class="bracket-wrap">
-        ${renderRound('Ottavi (Round of 16)', bracket.round_of_16)}
-        ${renderRound('Quarti di Finale', bracket.quarter_finals)}
-        ${renderRound('Semifinali', bracket.semi_finals)}
-        <div class="trophy-zone">
-          <img src="https://upload.wikimedia.org/wikipedia/commons/8/8e/FIFA_World_Cup_Trophy.png" alt="FIFA World Cup Trophy" onerror="this.style.display='none'" />
-          <div class="final-box">${renderMatch(bracket.final)}</div>
+  return `
+    <div class="section-label">Fase ad Eliminazione Diretta</div>
+    <div class="bracket-section">
+      <div class="bracket-outer">
+        ${col('Ottavi', r32L)}
+        ${col('Quarti', r16L)}
+        ${col('Semifinali', qfL)}
+        ${col('Finale', [sfL])}
+        <div class="bracket-trophy-col">
+          <img class="trophy-img"
+            src="https://upload.wikimedia.org/wikipedia/commons/8/8e/FIFA_World_Cup_Trophy.png"
+            onerror="this.style.display='none'"
+            alt="Trophy" />
+          <div class="trophy-label">Campione<br>del Mondo</div>
+          ${fin && fin.winner ? `<div style="font-size:9px;color:var(--gold2);font-weight:700;text-align:center;margin-top:2px;">${fin.winner}</div>` : ''}
         </div>
+        ${col('Finale', [sfR])}
+        ${col('Semifinali', qfR)}
+        ${col('Quarti', r16R)}
+        ${col('Ottavi', r32R)}
       </div>
+    </div>`;
+}
+
+/* ===================== MAIN ===================== */
+async function load() {
+  const app = document.getElementById('app');
+  try {
+    const res = await fetch('data/worldcup.json?v=' + Date.now());
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const data = await res.json();
+
+    const dt = data.lastUpdated ? new Date(data.lastUpdated) : null;
+    const updStr = dt
+      ? `Aggiornato: ${dt.toLocaleDateString('it-IT')} ${dt.toLocaleTimeString('it-IT',{hour:'2-digit',minute:'2-digit'})}`
+      : '';
+
+    app.innerHTML = `
+      <div class="wc-header">
+        <div class="wc-wordmark">FIFA World Cup</div>
+        <div class="wc-title">2026</div>
+        <div class="wc-updated">${updStr}</div>
+      </div>
+      ${renderGroups(data.groups || [])}
+      ${data.bracket ? renderBracket(data.bracket) : ''}
+      <div class="wc-footer">Dati: openfootball / github-actions · aggiornati ogni 6h</div>
     `;
+  } catch(e) {
+    app.innerHTML = `
+      <div class="error-screen">
+        <div class="err-title">FIFA WORLD CUP 2026</div>
+        <div>Dati Mondiale non disponibili.</div>
+        <div style="font-size:11px;opacity:.5;">Riprova più tardi.</div>
+      </div>`;
   }
+}
 
-  async function loadWorldCup() {
-    const content = document.getElementById('wc-content');
-    const updated = document.getElementById('wc-updated');
-    try {
-      const res = await fetch('data/worldcup.json?v=' + Date.now());
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const data = await res.json();
-
-      const dt = data.lastUpdated ? new Date(data.lastUpdated) : null;
-      updated.textContent = dt
-        ? `Aggiornato: ${dt.toLocaleDateString('it-IT')} ${dt.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'})}`
-        : '';
-
-      content.innerHTML = renderGroups(data.groups) + renderBracket(data.bracket) + `
-        <div class="wc-footer">Dati forniti da BALLDONTLIE</div>
-      `;
-    } catch (e) {
-      content.innerHTML = '<div class="error">Dati Mondiale non disponibili.<br>Riprova più tardi.</div>';
-      updated.textContent = '';
-    }
-  }
-
-  loadWorldCup();
+load();
 </script>
-
 </body>
 </html>
