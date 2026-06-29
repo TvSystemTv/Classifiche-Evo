@@ -1,1 +1,1211 @@
-{}
+{
+  "lastUpdated": "2026-06-29T23:06:30Z",
+  "groups": [
+    {
+      "name": "Group A",
+      "teams": [
+        {
+          "name": "Mexico",
+          "code": "MX",
+          "flag": "https://flagcdn.com/w40/mx.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 3,
+          "draw": 0,
+          "lost": 0,
+          "points": 9
+        },
+        {
+          "name": "South Africa",
+          "code": "ZA",
+          "flag": "https://flagcdn.com/w40/za.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 1,
+          "lost": 1,
+          "points": 4
+        },
+        {
+          "name": "South Korea",
+          "code": "KR",
+          "flag": "https://flagcdn.com/w40/kr.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 0,
+          "lost": 2,
+          "points": 3
+        },
+        {
+          "name": "Czech Republic",
+          "code": "CZ",
+          "flag": "https://flagcdn.com/w40/cz.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 0,
+          "draw": 1,
+          "lost": 2,
+          "points": 1
+        }
+      ]
+    },
+    {
+      "name": "Group B",
+      "teams": [
+        {
+          "name": "Switzerland",
+          "code": "CH",
+          "flag": "https://flagcdn.com/w40/ch.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 2,
+          "draw": 1,
+          "lost": 0,
+          "points": 7
+        },
+        {
+          "name": "Canada",
+          "code": "CA",
+          "flag": "https://flagcdn.com/w40/ca.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 1,
+          "lost": 1,
+          "points": 4
+        },
+        {
+          "name": "Bosnia & Herzegovina",
+          "code": "BA",
+          "flag": "https://flagcdn.com/w40/ba.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 1,
+          "lost": 1,
+          "points": 4
+        },
+        {
+          "name": "Qatar",
+          "code": "QA",
+          "flag": "https://flagcdn.com/w40/qa.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 0,
+          "draw": 1,
+          "lost": 2,
+          "points": 1
+        }
+      ]
+    },
+    {
+      "name": "Group C",
+      "teams": [
+        {
+          "name": "Brazil",
+          "code": "BR",
+          "flag": "https://flagcdn.com/w40/br.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 2,
+          "draw": 1,
+          "lost": 0,
+          "points": 7
+        },
+        {
+          "name": "Morocco",
+          "code": "MA",
+          "flag": "https://flagcdn.com/w40/ma.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 2,
+          "draw": 1,
+          "lost": 0,
+          "points": 7
+        },
+        {
+          "name": "Scotland",
+          "code": "GB-SCT",
+          "flag": "https://flagcdn.com/w40/gb-sct.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 0,
+          "lost": 2,
+          "points": 3
+        },
+        {
+          "name": "Haiti",
+          "code": "HT",
+          "flag": "https://flagcdn.com/w40/ht.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 0,
+          "draw": 0,
+          "lost": 3,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "name": "Group D",
+      "teams": [
+        {
+          "name": "USA",
+          "code": "US",
+          "flag": "https://flagcdn.com/w40/us.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 2,
+          "draw": 0,
+          "lost": 1,
+          "points": 6
+        },
+        {
+          "name": "Australia",
+          "code": "AU",
+          "flag": "https://flagcdn.com/w40/au.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 1,
+          "lost": 1,
+          "points": 4
+        },
+        {
+          "name": "Paraguay",
+          "code": "PY",
+          "flag": "https://flagcdn.com/w40/py.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 1,
+          "lost": 1,
+          "points": 4
+        },
+        {
+          "name": "Turkey",
+          "code": "TR",
+          "flag": "https://flagcdn.com/w40/tr.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 0,
+          "lost": 2,
+          "points": 3
+        }
+      ]
+    },
+    {
+      "name": "Group E",
+      "teams": [
+        {
+          "name": "Germany",
+          "code": "DE",
+          "flag": "https://flagcdn.com/w40/de.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 2,
+          "draw": 0,
+          "lost": 1,
+          "points": 6
+        },
+        {
+          "name": "Ivory Coast",
+          "code": "CI",
+          "flag": "https://flagcdn.com/w40/ci.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 2,
+          "draw": 0,
+          "lost": 1,
+          "points": 6
+        },
+        {
+          "name": "Ecuador",
+          "code": "EC",
+          "flag": "https://flagcdn.com/w40/ec.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 1,
+          "lost": 1,
+          "points": 4
+        },
+        {
+          "name": "Curaçao",
+          "code": "CW",
+          "flag": "https://flagcdn.com/w40/cw.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 0,
+          "draw": 1,
+          "lost": 2,
+          "points": 1
+        }
+      ]
+    },
+    {
+      "name": "Group F",
+      "teams": [
+        {
+          "name": "Netherlands",
+          "code": "NL",
+          "flag": "https://flagcdn.com/w40/nl.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 2,
+          "draw": 1,
+          "lost": 0,
+          "points": 7
+        },
+        {
+          "name": "Japan",
+          "code": "JP",
+          "flag": "https://flagcdn.com/w40/jp.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 2,
+          "lost": 0,
+          "points": 5
+        },
+        {
+          "name": "Sweden",
+          "code": "SE",
+          "flag": "https://flagcdn.com/w40/se.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 1,
+          "lost": 1,
+          "points": 4
+        },
+        {
+          "name": "Tunisia",
+          "code": "TN",
+          "flag": "https://flagcdn.com/w40/tn.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 0,
+          "draw": 0,
+          "lost": 3,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "name": "Group G",
+      "teams": [
+        {
+          "name": "Belgium",
+          "code": "BE",
+          "flag": "https://flagcdn.com/w40/be.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 2,
+          "lost": 0,
+          "points": 5
+        },
+        {
+          "name": "Egypt",
+          "code": "EG",
+          "flag": "https://flagcdn.com/w40/eg.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 2,
+          "lost": 0,
+          "points": 5
+        },
+        {
+          "name": "Iran",
+          "code": "IR",
+          "flag": "https://flagcdn.com/w40/ir.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 0,
+          "draw": 3,
+          "lost": 0,
+          "points": 3
+        },
+        {
+          "name": "New Zealand",
+          "code": "NZ",
+          "flag": "https://flagcdn.com/w40/nz.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 0,
+          "draw": 1,
+          "lost": 2,
+          "points": 1
+        }
+      ]
+    },
+    {
+      "name": "Group H",
+      "teams": [
+        {
+          "name": "Spain",
+          "code": "ES",
+          "flag": "https://flagcdn.com/w40/es.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 2,
+          "draw": 1,
+          "lost": 0,
+          "points": 7
+        },
+        {
+          "name": "Cape Verde",
+          "code": "CV",
+          "flag": "https://flagcdn.com/w40/cv.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 0,
+          "draw": 3,
+          "lost": 0,
+          "points": 3
+        },
+        {
+          "name": "Uruguay",
+          "code": "UY",
+          "flag": "https://flagcdn.com/w40/uy.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 0,
+          "draw": 2,
+          "lost": 1,
+          "points": 2
+        },
+        {
+          "name": "Saudi Arabia",
+          "code": "SA",
+          "flag": "https://flagcdn.com/w40/sa.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 0,
+          "draw": 2,
+          "lost": 1,
+          "points": 2
+        }
+      ]
+    },
+    {
+      "name": "Group I",
+      "teams": [
+        {
+          "name": "France",
+          "code": "FR",
+          "flag": "https://flagcdn.com/w40/fr.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 3,
+          "draw": 0,
+          "lost": 0,
+          "points": 9
+        },
+        {
+          "name": "Norway",
+          "code": "NO",
+          "flag": "https://flagcdn.com/w40/no.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 2,
+          "draw": 0,
+          "lost": 1,
+          "points": 6
+        },
+        {
+          "name": "Senegal",
+          "code": "SN",
+          "flag": "https://flagcdn.com/w40/sn.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 0,
+          "lost": 2,
+          "points": 3
+        },
+        {
+          "name": "Iraq",
+          "code": "IQ",
+          "flag": "https://flagcdn.com/w40/iq.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 0,
+          "draw": 0,
+          "lost": 3,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "name": "Group J",
+      "teams": [
+        {
+          "name": "Argentina",
+          "code": "AR",
+          "flag": "https://flagcdn.com/w40/ar.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 3,
+          "draw": 0,
+          "lost": 0,
+          "points": 9
+        },
+        {
+          "name": "Austria",
+          "code": "AT",
+          "flag": "https://flagcdn.com/w40/at.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 1,
+          "lost": 1,
+          "points": 4
+        },
+        {
+          "name": "Algeria",
+          "code": "DZ",
+          "flag": "https://flagcdn.com/w40/dz.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 1,
+          "lost": 1,
+          "points": 4
+        },
+        {
+          "name": "Jordan",
+          "code": "JO",
+          "flag": "https://flagcdn.com/w40/jo.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 0,
+          "draw": 0,
+          "lost": 3,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "name": "Group K",
+      "teams": [
+        {
+          "name": "Colombia",
+          "code": "CO",
+          "flag": "https://flagcdn.com/w40/co.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 2,
+          "draw": 1,
+          "lost": 0,
+          "points": 7
+        },
+        {
+          "name": "Portugal",
+          "code": "PT",
+          "flag": "https://flagcdn.com/w40/pt.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 2,
+          "lost": 0,
+          "points": 5
+        },
+        {
+          "name": "DR Congo",
+          "code": "CD",
+          "flag": "https://flagcdn.com/w40/cd.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 1,
+          "lost": 1,
+          "points": 4
+        },
+        {
+          "name": "Uzbekistan",
+          "code": "UZ",
+          "flag": "https://flagcdn.com/w40/uz.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 0,
+          "draw": 0,
+          "lost": 3,
+          "points": 0
+        }
+      ]
+    },
+    {
+      "name": "Group L",
+      "teams": [
+        {
+          "name": "England",
+          "code": "GB-ENG",
+          "flag": "https://flagcdn.com/w40/gb-eng.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 2,
+          "draw": 1,
+          "lost": 0,
+          "points": 7
+        },
+        {
+          "name": "Croatia",
+          "code": "HR",
+          "flag": "https://flagcdn.com/w40/hr.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 2,
+          "draw": 0,
+          "lost": 1,
+          "points": 6
+        },
+        {
+          "name": "Ghana",
+          "code": "GH",
+          "flag": "https://flagcdn.com/w40/gh.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 1,
+          "draw": 1,
+          "lost": 1,
+          "points": 4
+        },
+        {
+          "name": "Panama",
+          "code": "PA",
+          "flag": "https://flagcdn.com/w40/pa.png",
+          "placeholder": null,
+          "played": 3,
+          "won": 0,
+          "draw": 0,
+          "lost": 3,
+          "points": 0
+        }
+      ]
+    }
+  ],
+  "bracket": {
+    "round_of_32": [
+      {
+        "matchNumber": 73,
+        "home": {
+          "name": "South Africa",
+          "code": "ZA",
+          "flag": "https://flagcdn.com/w40/za.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": "Canada",
+          "code": "CA",
+          "flag": "https://flagcdn.com/w40/ca.png",
+          "placeholder": null
+        },
+        "homeScore": 0,
+        "awayScore": 1,
+        "winner": "Canada",
+        "datetime": "2026-06-28T12:00:00"
+      },
+      {
+        "matchNumber": 74,
+        "home": {
+          "name": "Germany",
+          "code": "DE",
+          "flag": "https://flagcdn.com/w40/de.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": "Paraguay",
+          "code": "PY",
+          "flag": "https://flagcdn.com/w40/py.png",
+          "placeholder": null
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-06-29T16:30:00"
+      },
+      {
+        "matchNumber": 75,
+        "home": {
+          "name": "Netherlands",
+          "code": "NL",
+          "flag": "https://flagcdn.com/w40/nl.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": "Morocco",
+          "code": "MA",
+          "flag": "https://flagcdn.com/w40/ma.png",
+          "placeholder": null
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-06-29T19:00:00"
+      },
+      {
+        "matchNumber": 76,
+        "home": {
+          "name": "Brazil",
+          "code": "BR",
+          "flag": "https://flagcdn.com/w40/br.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": "Japan",
+          "code": "JP",
+          "flag": "https://flagcdn.com/w40/jp.png",
+          "placeholder": null
+        },
+        "homeScore": 2,
+        "awayScore": 1,
+        "winner": "Brazil",
+        "datetime": "2026-06-29T12:00:00"
+      },
+      {
+        "matchNumber": 77,
+        "home": {
+          "name": "France",
+          "code": "FR",
+          "flag": "https://flagcdn.com/w40/fr.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": "Sweden",
+          "code": "SE",
+          "flag": "https://flagcdn.com/w40/se.png",
+          "placeholder": null
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-06-30T17:00:00"
+      },
+      {
+        "matchNumber": 78,
+        "home": {
+          "name": "Ivory Coast",
+          "code": "CI",
+          "flag": "https://flagcdn.com/w40/ci.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": "Norway",
+          "code": "NO",
+          "flag": "https://flagcdn.com/w40/no.png",
+          "placeholder": null
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-06-30T12:00:00"
+      },
+      {
+        "matchNumber": 79,
+        "home": {
+          "name": "Mexico",
+          "code": "MX",
+          "flag": "https://flagcdn.com/w40/mx.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": "Ecuador",
+          "code": "EC",
+          "flag": "https://flagcdn.com/w40/ec.png",
+          "placeholder": null
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-06-30T19:00:00"
+      },
+      {
+        "matchNumber": 80,
+        "home": {
+          "name": "England",
+          "code": "GB-ENG",
+          "flag": "https://flagcdn.com/w40/gb-eng.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": "DR Congo",
+          "code": "CD",
+          "flag": "https://flagcdn.com/w40/cd.png",
+          "placeholder": null
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-01T12:00:00"
+      },
+      {
+        "matchNumber": 81,
+        "home": {
+          "name": "USA",
+          "code": "US",
+          "flag": "https://flagcdn.com/w40/us.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": "Bosnia & Herzegovina",
+          "code": "BA",
+          "flag": "https://flagcdn.com/w40/ba.png",
+          "placeholder": null
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-01T17:00:00"
+      },
+      {
+        "matchNumber": 82,
+        "home": {
+          "name": "Belgium",
+          "code": "BE",
+          "flag": "https://flagcdn.com/w40/be.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": "Senegal",
+          "code": "SN",
+          "flag": "https://flagcdn.com/w40/sn.png",
+          "placeholder": null
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-01T13:00:00"
+      },
+      {
+        "matchNumber": 83,
+        "home": {
+          "name": "Portugal",
+          "code": "PT",
+          "flag": "https://flagcdn.com/w40/pt.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": "Croatia",
+          "code": "HR",
+          "flag": "https://flagcdn.com/w40/hr.png",
+          "placeholder": null
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-02T19:00:00"
+      },
+      {
+        "matchNumber": 84,
+        "home": {
+          "name": "Spain",
+          "code": "ES",
+          "flag": "https://flagcdn.com/w40/es.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": "Austria",
+          "code": "AT",
+          "flag": "https://flagcdn.com/w40/at.png",
+          "placeholder": null
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-02T12:00:00"
+      },
+      {
+        "matchNumber": 85,
+        "home": {
+          "name": "Switzerland",
+          "code": "CH",
+          "flag": "https://flagcdn.com/w40/ch.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": "Algeria",
+          "code": "DZ",
+          "flag": "https://flagcdn.com/w40/dz.png",
+          "placeholder": null
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-02T20:00:00"
+      },
+      {
+        "matchNumber": 86,
+        "home": {
+          "name": "Argentina",
+          "code": "AR",
+          "flag": "https://flagcdn.com/w40/ar.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": "Cape Verde",
+          "code": "CV",
+          "flag": "https://flagcdn.com/w40/cv.png",
+          "placeholder": null
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-03T18:00:00"
+      },
+      {
+        "matchNumber": 87,
+        "home": {
+          "name": "Colombia",
+          "code": "CO",
+          "flag": "https://flagcdn.com/w40/co.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": "Ghana",
+          "code": "GH",
+          "flag": "https://flagcdn.com/w40/gh.png",
+          "placeholder": null
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-03T20:30:00"
+      },
+      {
+        "matchNumber": 88,
+        "home": {
+          "name": "Australia",
+          "code": "AU",
+          "flag": "https://flagcdn.com/w40/au.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": "Egypt",
+          "code": "EG",
+          "flag": "https://flagcdn.com/w40/eg.png",
+          "placeholder": null
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-03T13:00:00"
+      }
+    ],
+    "round_of_16": [
+      {
+        "matchNumber": 89,
+        "home": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 74"
+        },
+        "away": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 77"
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-04T17:00:00"
+      },
+      {
+        "matchNumber": 90,
+        "home": {
+          "name": "Canada",
+          "code": "CA",
+          "flag": "https://flagcdn.com/w40/ca.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 75"
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-04T12:00:00"
+      },
+      {
+        "matchNumber": 91,
+        "home": {
+          "name": "Brazil",
+          "code": "BR",
+          "flag": "https://flagcdn.com/w40/br.png",
+          "placeholder": null
+        },
+        "away": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 78"
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-05T16:00:00"
+      },
+      {
+        "matchNumber": 92,
+        "home": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 79"
+        },
+        "away": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 80"
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-05T18:00:00"
+      },
+      {
+        "matchNumber": 93,
+        "home": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 83"
+        },
+        "away": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 84"
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-06T14:00:00"
+      },
+      {
+        "matchNumber": 94,
+        "home": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 81"
+        },
+        "away": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 82"
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-06T17:00:00"
+      },
+      {
+        "matchNumber": 95,
+        "home": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 86"
+        },
+        "away": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 88"
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-07T12:00:00"
+      },
+      {
+        "matchNumber": 96,
+        "home": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 85"
+        },
+        "away": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 87"
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-07T13:00:00"
+      }
+    ],
+    "quarter_finals": [
+      {
+        "matchNumber": 97,
+        "home": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 89"
+        },
+        "away": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 90"
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-09T16:00:00"
+      },
+      {
+        "matchNumber": 98,
+        "home": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 93"
+        },
+        "away": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 94"
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-10T12:00:00"
+      },
+      {
+        "matchNumber": 99,
+        "home": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 91"
+        },
+        "away": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 92"
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-11T17:00:00"
+      },
+      {
+        "matchNumber": 100,
+        "home": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 95"
+        },
+        "away": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 96"
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-11T20:00:00"
+      }
+    ],
+    "semi_finals": [
+      {
+        "matchNumber": 101,
+        "home": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 97"
+        },
+        "away": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 98"
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-14T14:00:00"
+      },
+      {
+        "matchNumber": 102,
+        "home": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 99"
+        },
+        "away": {
+          "name": null,
+          "code": null,
+          "flag": null,
+          "placeholder": "Vincente Match 100"
+        },
+        "homeScore": null,
+        "awayScore": null,
+        "winner": null,
+        "datetime": "2026-07-15T15:00:00"
+      }
+    ],
+    "third_place": {
+      "matchNumber": 103,
+      "home": {
+        "name": null,
+        "code": null,
+        "flag": null,
+        "placeholder": "Perdente Match 101"
+      },
+      "away": {
+        "name": null,
+        "code": null,
+        "flag": null,
+        "placeholder": "Perdente Match 102"
+      },
+      "homeScore": null,
+      "awayScore": null,
+      "winner": null,
+      "datetime": "2026-07-18T17:00:00"
+    },
+    "final": {
+      "matchNumber": 104,
+      "home": {
+        "name": null,
+        "code": null,
+        "flag": null,
+        "placeholder": "Vincente Match 101"
+      },
+      "away": {
+        "name": null,
+        "code": null,
+        "flag": null,
+        "placeholder": "Vincente Match 102"
+      },
+      "homeScore": null,
+      "awayScore": null,
+      "winner": null,
+      "datetime": "2026-07-19T15:00:00"
+    }
+  }
+}
