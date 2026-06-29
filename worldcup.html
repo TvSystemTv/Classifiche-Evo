@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FIFA World Cup 2026 - Wallchart</title>
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    padding: 16px;
+    font-family: 'Roboto', Arial, sans-serif;
+    background: linear-gradient(135deg, #6e0e23 0%, #8a1230 50%, #6e0e23 100%);
+    color: #fff;
+    overflow-x: hidden;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  .wc-title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 4px;
+    text-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  }
+
+  .wc-subtitle {
+    text-align: center;
+    font-size: 12px;
+    opacity: 0.8;
+    margin-bottom: 16px;
+  }
+
+  .wc-stage-label {
+    text-align: center;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #ffd166;
+    margin: 18px 0 8px;
+  }
+
+  /* ---- GRUPPI ---- */
+  .groups-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+
+  .group-card {
+    background: rgba(255,255,255,0.07);
+    border: 1px solid rgba(255,255,255,0.15);
+    border-radius: 8px;
+    overflow: hidden;
+  }
+
+  .group-card-header {
+    background: rgba(0,0,0,0.25);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 8px;
+    letter-spacing: 0.5px;
+  }
+
+  .group-team-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 8px;
+    font-size: 11px;
+    border-top: 1px solid rgba(255,255,255,0.08);
+  }
+
+  .group-team-row .team-info {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    overflow: hidden;
+  }
+
+  .group-team-row img {
+    width: 16px;
+    height: 12px;
+    object-fit: cover;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .group-team-row .team-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 110px;
+  }
+
+  .group-team-row .pts {
+    font-weight: 700;
+    color: #ffd166;
+  }
+
+  /* ---- BRACKET ---- */
+  .bracket-wrap {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    margin: 10px 0 24px;
+  }
+
+  .bracket-round-title {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #ffd166;
+    opacity: 0.9;
+    margin-top: 10px;
+  }
+
+  .bracket-row {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+  }
+
+  .match-box {
+    background: rgba(255,255,255,0.09);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 6px;
+    width: 150px;
+    overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  .match-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 6px;
+    font-size: 10.5px;
+    gap: 4px;
+  }
+
+  .match-row + .match-row {
+    border-top: 1px solid rgba(255,255,255,0.12);
+  }
+
+  .match-row.winner {
+    background: rgba(255,209,102,0.18);
+    font-weight: 700;
+  }
+
+  .match-row .side {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    overflow: hidden;
+  }
+
+  .match-row img {
+    width: 14px;
+    height: 10px;
+    object-fit: cover;
+    border-radius: 2px;
+    flex-shrink: 0;
+  }
+
+  .match-row .side-name {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 78px;
+    font-size: 10px;
+  }
+
+  .match-row .placeholder-name {
+    font-style: italic;
+    opacity: 0.6;
+    font-size: 9px;
+  }
+
+  .match-row .score {
+    font-weight: 700;
+    min-width: 14px;
+    text-align: right;
+  }
+
+  /* ---- TROFEO CENTRALE ---- */
+  .trophy-zone {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin: 18px 0;
+  }
+
+  .trophy-zone img {
+    width: 90px;
+    height: auto;
+    filter: drop-shadow(0 4px 14px rgba(255,209,102,0.5));
+  }
+
+  .final-box {
+    margin-top: 10px;
+    width: 190px;
+  }
+
+  .final-box .match-box {
+    width: 100%;
+    border-color: #ffd166;
+  }
+
+  .wc-footer {
+    text-align: center;
+    font-size: 10px;
+    color: rgba(255,255,255,0.6);
+    margin-top: 10px;
+  }
+
+  .error {
+    text-align: center;
+    padding: 30px;
+    font-size: 13px;
+    color: #ffb4b4;
+  }
+</style>
+</head>
+<body>
+
+<div class="wc-title">FIFA WORLD CUP 2026</div>
+<div class="wc-subtitle" id="wc-updated">Caricamento dati...</div>
+
+<div id="wc-content"></div>
+
+<script>
+  const FLAG_FALLBACK = "https://flagcdn.com/w40/un.png";
+
+  function flagImg(team, cls) {
+    if (!team) return `<span class="${cls} placeholder-name">TBD</span>`;
+    if (team.placeholder && !team.code) {
+      return `<span class="${cls} placeholder-name">${team.placeholder}</span>`;
+    }
+    return `
+      <img src="${team.flag || FLAG_FALLBACK}" onerror="this.src='${FLAG_FALLBACK}'" alt="${team.code || ''}" />
+      <span class="${cls}">${team.name}</span>
+    `;
+  }
+
+  function renderGroups(groups) {
+    if (!groups || !groups.length) return '';
+    const cards = groups.map(g => {
+      const rows = g.teams.map(t => `
+        <div class="group-team-row">
+          <div class="team-info">
+            <img src="${t.flag || FLAG_FALLBACK}" onerror="this.src='${FLAG_FALLBACK}'" alt="${t.code || ''}" />
+            <span class="team-name">${t.name}</span>
+          </div>
+          <span class="pts">${t.points ?? 0}</span>
+        </div>
+      `).join('');
+      return `
+        <div class="group-card">
+          <div class="group-card-header">${g.name}</div>
+          ${rows}
+        </div>
+      `;
+    }).join('');
+    return `
+      <div class="wc-stage-label">Fase a Gironi</div>
+      <div class="groups-grid">${cards}</div>
+    `;
+  }
+
+  function renderMatch(m) {
+    if (!m) {
+      return `
+        <div class="match-box">
+          <div class="match-row"><span class="side placeholder-name">TBD</span></div>
+          <div class="match-row"><span class="side placeholder-name">TBD</span></div>
+        </div>`;
+    }
+    const homeWin = m.winner && m.home && m.winner === m.home.name;
+    const awayWin = m.winner && m.away && m.winner === m.away.name;
+    return `
+      <div class="match-box">
+        <div class="match-row ${homeWin ? 'winner' : ''}">
+          <span class="side">${flagImg(m.home, 'side-name')}</span>
+          <span class="score">${m.homeScore ?? ''}</span>
+        </div>
+        <div class="match-row ${awayWin ? 'winner' : ''}">
+          <span class="side">${flagImg(m.away, 'side-name')}</span>
+          <span class="score">${m.awayScore ?? ''}</span>
+        </div>
+      </div>`;
+  }
+
+  function renderRound(label, matches) {
+    if (!matches || !matches.length) return '';
+    return `
+      <div class="bracket-round-title">${label}</div>
+      <div class="bracket-row">${matches.map(renderMatch).join('')}</div>
+    `;
+  }
+
+  function renderBracket(bracket) {
+    if (!bracket) return '';
+    return `
+      <div class="bracket-wrap">
+        ${renderRound('Ottavi (Round of 16)', bracket.round_of_16)}
+        ${renderRound('Quarti di Finale', bracket.quarter_finals)}
+        ${renderRound('Semifinali', bracket.semi_finals)}
+        <div class="trophy-zone">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/8/8e/FIFA_World_Cup_Trophy.png" alt="FIFA World Cup Trophy" onerror="this.style.display='none'" />
+          <div class="final-box">${renderMatch(bracket.final)}</div>
+        </div>
+      </div>
+    `;
+  }
+
+  async function loadWorldCup() {
+    const content = document.getElementById('wc-content');
+    const updated = document.getElementById('wc-updated');
+    try {
+      const res = await fetch('worldcup.json?v=' + Date.now());
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      const data = await res.json();
+
+      const dt = data.lastUpdated ? new Date(data.lastUpdated) : null;
+      updated.textContent = dt
+        ? `Aggiornato: ${dt.toLocaleDateString('it-IT')} ${dt.toLocaleTimeString('it-IT', {hour:'2-digit', minute:'2-digit'})}`
+        : '';
+
+      content.innerHTML = renderGroups(data.groups) + renderBracket(data.bracket) + `
+        <div class="wc-footer">Dati forniti da BALLDONTLIE</div>
+      `;
+    } catch (e) {
+      content.innerHTML = '<div class="error">Dati Mondiale non disponibili.<br>Riprova più tardi.</div>';
+      updated.textContent = '';
+    }
+  }
+
+  loadWorldCup();
+</script>
+
+</body>
+</html>
