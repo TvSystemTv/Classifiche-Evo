@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-06-29T23:10:22Z",
+  "lastUpdated": "2026-06-29T23:56:45Z",
   "groups": [
     {
       "name": "Group A",
@@ -625,8 +625,8 @@
           "flag": "https://flagcdn.com/w40/py.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
+        "homeScore": 1,
+        "awayScore": 1,
         "winner": null,
         "datetime": "2026-06-29T16:30:00"
       },
