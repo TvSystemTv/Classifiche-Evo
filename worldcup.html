@@ -325,7 +325,7 @@
     const content = document.getElementById('wc-content');
     const updated = document.getElementById('wc-updated');
     try {
-      const res = await fetch('worldcup.json?v=' + Date.now());
+      const res = await fetch('data/worldcup.json?v=' + Date.now());
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const data = await res.json();
 
