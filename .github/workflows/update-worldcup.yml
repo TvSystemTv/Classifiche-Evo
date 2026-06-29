@@ -1,0 +1,38 @@
+name: Update World Cup
+
+on:
+  schedule:
+    # Ogni 6 ore. I dati sorgente (openfootball) sono aggiornati a mano
+    # circa una volta al giorno, quindi non serve una cadenza più fitta.
+    - cron: "0 */6 * * *"
+  workflow_dispatch: {}   # permette l'avvio manuale dalla tab Actions
+
+permissions:
+  contents: write
+
+jobs:
+  update-worldcup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Genera data/worldcup.json
+        run: python3 scripts/build_worldcup_json.py > data/worldcup.json
+
+      - name: Commit se ci sono cambiamenti
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          if ! git diff --quiet -- data/worldcup.json; then
+            git add data/worldcup.json
+            git commit -m "Aggiorna dati Mondiale 2026"
+            git push
+          else
+            echo "Nessun cambiamento nei dati Mondiale."
+          fi
