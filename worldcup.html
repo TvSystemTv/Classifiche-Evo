@@ -390,63 +390,108 @@ function buildSVG(data) {
   colLabel(gT,'OTTAVI',     X.r16R+BOX_W/2, LY);
   colLabel(gT,'SEDICESIMI', X.r32R+BOX_W/2, LY);
 
-  // ══ Albero binario fisso per POSIZIONE: 8 slot R32 per lato, ──
-  // ogni round successivo dimezza l'array in ordine (già riordinato
-  // a monte per coerenza reale tramite buildOrderedRounds) ──────
-
-  // ── LATO SINISTRO ════════════════════════════════════════════
-  for (let i=0;i<8;i++) {
-    drawBox(gB, defs, r32[i], X.r32L, slotY(i));
-    hline(gL, X.r32L+BOX_W, X.r16L, slotCY(i));
-  }
-  for (let i=0;i<4;i++) vline(gL, X.r16L, slotCY(2*i), slotCY(2*i+1));
+  // ══ Geometria fissa per POSIZIONE (8 slot R32 per lato, ordine ──
+  // già riordinato a monte per leggibilità tramite buildOrderedRounds),
+  // ma le LINEE seguono i VERI matchNumber genitori (anche quando il
+  // genitore reale non è nello slot "adiacente pulito" — in quel caso
+  // la linea diventa un percorso ad angolo che raggiunge la Y esatta) ──
 
   function pairCY(getCY, i) { return (getCY(2*i) + getCY(2*i+1)) / 2; }
   const r16CYL = i => pairCY(slotCY, i);
+  const qfCYL  = i => pairCY(r16CYL, i);
+  const sfLY   = (qfCYL(0)+qfCYL(1))/2;
+  const r16CYR = i => pairCY(slotCY, i);
+  const qfCYR  = i => pairCY(r16CYR, i);
+  const sfRY   = (qfCYR(0)+qfCYR(1))/2;
+
+  // Mappa matchNumber -> {x: colonna del box, y: centro reale di disegno}
+  const posByNum = {};
+  r32.slice(0,8).forEach((m,i) => { posByNum[m.matchNumber] = {x:X.r32L+BOX_W, y:slotCY(i)}; });
+  r32.slice(8,16).forEach((m,i) => { posByNum[m.matchNumber] = {x:X.r32R,      y:slotCY(i)}; });
+  r16.slice(0,4).forEach((m,i) => { posByNum[m.matchNumber] = {x:X.r16L+BOX_W, y:r16CYL(i)}; });
+  r16.slice(4,8).forEach((m,i) => { posByNum[m.matchNumber] = {x:X.r16R,      y:r16CYR(i)}; });
+  qf.slice(0,2).forEach((m,i) => { posByNum[m.matchNumber] = {x:X.qfL+BOX_W, y:qfCYL(i)}; });
+  qf.slice(2,4).forEach((m,i) => { posByNum[m.matchNumber] = {x:X.qfR,      y:qfCYR(i)}; });
+  if (sf[0]) posByNum[sf[0].matchNumber] = {x:X.sfL+BOX_W, y:sfLY};
+  if (sf[1]) posByNum[sf[1].matchNumber] = {x:X.sfR,      y:sfRY};
+
+  // Trova i veri matchNumber genitori di un match (placeholder o winner risolto)
+  function findOriginNum(side, prevByNum) {
+    const ph = side?.placeholder || '';
+    const mm = ph.match(/Match (\d+)/);
+    if (mm) return parseInt(mm[1],10);
+    if (side?.name) {
+      for (const numStr in prevByNum) {
+        if (prevByNum[numStr].winner === side.name) return parseInt(numStr,10);
+      }
+    }
+    return null;
+  }
+
+  // Disegna le 2 linee in ENTRATA di un match (dai suoi 2 veri genitori),
+  // verso il bordo sinistro (o destro, per il lato R) del box di destinazione.
+  // Se il genitore è a Y diversa, traccia un path ad angolo (orizz-vert-orizz).
+  function drawParentLines(match, prevByNum, destX, isRightSide) {
+    const refs = ['home','away'].map(s => findOriginNum(match[s], prevByNum)).filter(n => n !== null);
+    refs.forEach(refNum => {
+      const parent = posByNum[refNum];
+      if (!parent) return;
+      const startX = parent.x;
+      const startY = parent.y;
+      const endX = destX;
+      const endY = posByNum[match.matchNumber].y;
+      if (Math.abs(startY - endY) < 1) {
+        hline(gL, isRightSide?endX:startX, isRightSide?startX:endX, startY);
+      } else {
+        const midX = (startX + endX) / 2;
+        pathConn(gL, `M${startX},${startY} H${midX} V${endY} H${endX}`);
+      }
+    });
+  }
+
+  // ── LATO SINISTRO ════════════════════════════════════════════
+  for (let i=0;i<8;i++) drawBox(gB, defs, r32[i], X.r32L, slotY(i));
+
+  const r32ByNum = {}; r32.forEach(m => { r32ByNum[m.matchNumber] = m; });
+  const r16ByNum = {}; r16.forEach(m => { r16ByNum[m.matchNumber] = m; });
+  const qfByNum  = {}; qf.forEach(m => { qfByNum[m.matchNumber] = m; });
 
   for (let i=0;i<4;i++) {
-    const cy = r16CYL(i);
-    drawBox(gB, defs, r16[i], X.r16L, cy-BOX_H/2);
-    hline(gL, X.r16L+BOX_W, X.qfL, cy);
+    const m = r16[i];
+    drawBox(gB, defs, m, X.r16L, r16CYL(i)-BOX_H/2);
+    drawParentLines(m, r32ByNum, X.r16L, false);
   }
-  for (let i=0;i<2;i++) vline(gL, X.qfL, r16CYL(2*i), r16CYL(2*i+1));
 
-  const qfCYL = i => pairCY(r16CYL, i);
   for (let i=0;i<2;i++) {
-    const cy = qfCYL(i);
-    drawBox(gB, defs, qf[i], X.qfL, cy-BOX_H/2);
-    hline(gL, X.qfL+BOX_W, X.sfL, cy);
+    const m = qf[i];
+    drawBox(gB, defs, m, X.qfL, qfCYL(i)-BOX_H/2);
+    drawParentLines(m, r16ByNum, X.qfL, false);
   }
-  vline(gL, X.sfL, qfCYL(0), qfCYL(1));
 
-  const sfLY = (qfCYL(0)+qfCYL(1))/2;
-  drawBox(gB, defs, sf[0], X.sfL, sfLY-BOX_H/2);
+  if (sf[0]) {
+    drawBox(gB, defs, sf[0], X.sfL, sfLY-BOX_H/2);
+    drawParentLines(sf[0], qfByNum, X.sfL, false);
+  }
 
   // ── LATO DESTRO ══════════════════════════════════════════════
-  for (let i=0;i<8;i++) {
-    drawBox(gB, defs, r32[8+i], X.r32R, slotY(i));
-    hline(gL, X.r16R+BOX_W, X.r32R, slotCY(i));
-  }
-  for (let i=0;i<4;i++) vline(gL, X.r16R+BOX_W, slotCY(2*i), slotCY(2*i+1));
+  for (let i=0;i<8;i++) drawBox(gB, defs, r32[8+i], X.r32R, slotY(i));
 
-  const r16CYR = i => pairCY(slotCY, i);
   for (let i=0;i<4;i++) {
-    const cy = r16CYR(i);
-    drawBox(gB, defs, r16[4+i], X.r16R, cy-BOX_H/2);
-    hline(gL, X.qfR+BOX_W, X.r16R, cy);
+    const m = r16[4+i];
+    drawBox(gB, defs, m, X.r16R, r16CYR(i)-BOX_H/2);
+    drawParentLines(m, r32ByNum, X.r16R+BOX_W, true);
   }
-  for (let i=0;i<2;i++) vline(gL, X.qfR+BOX_W, r16CYR(2*i), r16CYR(2*i+1));
 
-  const qfCYR = i => pairCY(r16CYR, i);
   for (let i=0;i<2;i++) {
-    const cy = qfCYR(i);
-    drawBox(gB, defs, qf[2+i], X.qfR, cy-BOX_H/2);
-    hline(gL, X.sfR+BOX_W, X.qfR, cy);
+    const m = qf[2+i];
+    drawBox(gB, defs, m, X.qfR, qfCYR(i)-BOX_H/2);
+    drawParentLines(m, r16ByNum, X.qfR+BOX_W, true);
   }
-  vline(gL, X.sfR+BOX_W, qfCYR(0), qfCYR(1));
 
-  const sfRY = (qfCYR(0)+qfCYR(1))/2;
-  drawBox(gB, defs, sf[1], X.sfR, sfRY-BOX_H/2);
+  if (sf[1]) {
+    drawBox(gB, defs, sf[1], X.sfR, sfRY-BOX_H/2);
+    drawParentLines(sf[1], qfByNum, X.sfR+BOX_W, true);
+  }
 
   // ══ CENTRO ══════════════════════════════════════════════════
   const finBX = CX - FINAL_W/2;
