@@ -43,7 +43,7 @@ const C = {
   muted:   '#9999bb',
   boxBg:   'rgba(8,8,24,0.78)',
   winBg:   'rgba(201,168,76,0.22)',
-  line:    'rgba(255,255,255,0.30)',
+  line:    '#5ec8ff',
   border:  'rgba(255,255,255,0.22)',
   borderW: '#c9a84c',
 };
@@ -101,7 +101,10 @@ function drawBox(parent, defs, match, bx, by) {
 
   function drawRow(team, ry, isWin, isElim) {
     const name = team?.name || null;
-    const ph   = team?.placeholder || 'TBD';
+    let ph     = team?.placeholder || 'TBD';
+    // Accorcia "Vincente Match 74" -> "Vincente", "Perdente Match 101" -> "Perdente"
+    if (/^Vincente/i.test(ph)) ph = 'Vincente';
+    else if (/^Perdente/i.test(ph)) ph = 'Perdente';
     const flag = team?.flag || FLAG_FB;
     const op   = isElim ? 0.28 : 1;
     const g    = se('g',{opacity:op});
@@ -135,16 +138,16 @@ function drawBox(parent, defs, match, bx, by) {
       );
     }
 
-    const tx = bx + 9 + FLAG_R*2 + 9;
-    const tw = BOX_W - (9+FLAG_R*2+9) - 7;
+    const tx = bx + 9 + FLAG_R*2 + 16;
+    const tw = BOX_W - (9+FLAG_R*2+16) - 7;
     const tcid = 'n'+(++_cn);
     ap(defs, ap(se('clipPath',{id:tcid}), se('rect',{x:tx,y:ry,width:tw,height:ROW_H})));
     ap(g, st(name||ph, {
       x:tx, y:ry+ROW_H/2+7,
-      'font-size': name?18:14,
-      fill: name?(isWin?C.gold2:C.white):C.muted,
-      'font-style': name?'normal':'italic',
-      'font-weight': isWin?800:600,
+      'font-size': name?18:15,
+      fill: name?(isWin?C.gold2:C.white):C.gold2,
+      'font-style': 'normal',
+      'font-weight': name?(isWin?800:600):800,
       'clip-path':`url(#${tcid})`
     }));
 
@@ -186,7 +189,7 @@ function buildSVG(data) {
   const bgImg = se('image',{href:'assets/bg.jpg',x:0,y:0,width:VW,height:VH,
     preserveAspectRatio:'xMidYMid slice'});
   svg.appendChild(bgImg);
-  svg.appendChild(se('rect',{x:0,y:0,width:VW,height:VH,fill:'rgba(0,0,12,0.72)'}));
+  svg.appendChild(se('rect',{x:0,y:0,width:VW,height:VH,fill:'rgba(20,22,35,0.45)'}));
 
   const gL = se('g',{id:'lines'});
   const gB = se('g',{id:'boxes'});
@@ -273,10 +276,11 @@ function buildSVG(data) {
   });
   svg.appendChild(tImg);
 
-  const tpY = tY + tH + 12;
-  ap(gT, st('3° POSTO',{
-    x:CX,y:tpY-10,'text-anchor':'middle',
-    'font-size':15,fill:'rgba(255,255,255,0.5)','font-weight':800,'letter-spacing':3
+  const tpLabelY = tY + tH + 14;
+  const tpY = tpLabelY + 14;
+  ap(gT, st('FINALE 3° POSTO',{
+    x:CX,y:tpLabelY,'text-anchor':'middle',
+    'font-size':14,fill:'rgba(255,255,255,0.55)','font-weight':800,'letter-spacing':2.5
   }));
   drawBox(gB, defs, tp, X.fin, tpY);
 
