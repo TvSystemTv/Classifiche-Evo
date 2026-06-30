@@ -1,0 +1,603 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FIFA World Cup 2026</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body {
+    width: 100%; height: 100%;
+    overflow: hidden;
+    pointer-events: none;
+    user-select: none;
+    font-family: 'Roboto', Arial, sans-serif;
+    background: #000;
+  }
+  #scroll-root {
+    width: 100%; height: 100vh;
+    overflow-y: auto; overflow-x: hidden;
+    scrollbar-width: none;
+  }
+  #scroll-root::-webkit-scrollbar { display: none; }
+  #app { width: 100%; }
+  .error-screen {
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    height: 100vh; gap: 12px;
+    color: #888; font-size: 16px; text-align: center;
+    background: #050510;
+  }
+  .error-screen .et { font-size: 30px; font-weight: 900; color: #fff; }
+</style>
+</head>
+<body>
+<div id="scroll-root"><div id="app"></div></div>
+<script>
+'use strict';
+
+const C = {
+  gold:     '#c9a84c',
+  gold2:    '#f0d878',
+  bronze:   '#cd7f32',
+  bronze2:  '#e8a868',
+  white:    '#ffffff',
+  muted:    '#9999bb',
+  boxBg:    'rgba(8,8,24,0.80)',
+  winBg:    'rgba(201,168,76,0.22)',
+  line:     '#0d1b3e',
+  lineEdge: '#e23b3b',
+  border:   'rgba(255,255,255,0.22)',
+  borderW:  '#c9a84c',
+  navyText: '#0d1b3e',
+};
+const FLAG_FB = 'https://flagcdn.com/w40/un.png';
+const NS = 'http://www.w3.org/2000/svg';
+let _cn = 0;
+
+function se(tag, a={}) {
+  const e = document.createElementNS(NS, tag);
+  for (const [k,v] of Object.entries(a)) e.setAttribute(k, String(v));
+  return e;
+}
+function st(text, a={}) { const e=se('text',a); e.textContent=text; return e; }
+function ap(p,...ch) { for(const c of ch) if(c) p.appendChild(c); return p; }
+
+// ── Layout ────────────────────────────────────────────────────
+const VW=1920, VH=1080, CX=960;
+const BOX_W=178, BOX_H=96, ROW_H=48;
+const FLAG_R=19;
+const TOP_PAD=58, BOT_PAD=14;
+const SLOT_H = Math.floor((VH - TOP_PAD - BOT_PAD) / 8);
+
+const FINAL_W = 240;
+const FINAL_H = 86;
+const WINNER_W = 250;
+const WINNER_H = 58;
+
+const X = {
+  r32L: 14,
+  r16L: 216,
+  qfL:  418,
+  sfL:  620,
+  fin:  CX - FINAL_W/2,
+  sfR:  VW - 620 - BOX_W,
+  qfR:  VW - 418 - BOX_W,
+  r16R: VW - 216 - BOX_W,
+  r32R: VW - 14  - BOX_W,
+};
+
+function slotY(i)  { return TOP_PAD + i*SLOT_H + Math.floor((SLOT_H-BOX_H)/2); }
+function slotCY(i) { return slotY(i) + BOX_H/2; }
+
+// ── Mappatura dinamica matchNumber → posizione Y ────────────────
+// Il bracket FIFA non segue un ordine sequenziale 2i/2i+1: gli accoppiamenti
+// reali sono intrecciati (es. R16 #90 unisce i vincitori dei match 73 e 75,
+// non 73-74). Quindi ricaviamo i riferimenti veri leggendo i placeholder
+// "Vincente Match N" / "Perdente Match N" di ciascun match, e calcoliamo
+// la sua Y come media delle Y dei match che lo alimentano.
+
+function buildMatchYMap(r32, r16, qf, sf) {
+  const yMap = {}; // matchNumber -> centerY
+  const winnerOrigin = {}; // teamName -> matchNumber che l'ha generata come vincitrice
+
+  // R32: posizione fissa in 8 slot verticali, condivisi da lato sinistro
+  // (indici 0-7) e lato destro (indici 8-15, stessa Y del rispettivo i%8)
+  r32.forEach((m,i) => {
+    yMap[m.matchNumber] = slotCY(i % 8);
+    if (m.winner) winnerOrigin[m.winner] = m.matchNumber;
+  });
+
+  // Per un lato del match, trova il matchNumber che lo alimenta:
+  // - se è un placeholder "Vincente/Perdente Match N" → N
+  // - se è una squadra reale già nota → matchNumber che l'ha prodotta come vincitrice
+  function sideOriginMatch(side) {
+    const ph = side?.placeholder || '';
+    const m = ph.match(/Match (\d+)/);
+    if (m) return parseInt(m[1],10);
+    if (side?.name && winnerOrigin[side.name] !== undefined) return winnerOrigin[side.name];
+    return null;
+  }
+
+  function resolveRound(round) {
+    round.forEach(m => {
+      const refs = [sideOriginMatch(m.home), sideOriginMatch(m.away)]
+        .filter(n => n !== null);
+      const ys = refs.map(n => yMap[n]).filter(y => y !== undefined);
+      if (ys.length > 0) {
+        yMap[m.matchNumber] = ys.reduce((a,b)=>a+b,0) / ys.length;
+      }
+      if (m.winner) winnerOrigin[m.winner] = m.matchNumber;
+    });
+  }
+
+  resolveRound(r16);
+  resolveRound(qf);
+  resolveRound(sf);
+
+  return yMap;
+}
+
+// ── Box match VERTICALE (2 righe impilate) — usato per R32..SF ──
+function drawBox(parent, defs, match, bx, by) {
+  const winner = match?.winner || null;
+  const homeWin = winner && match?.home?.name && winner===match.home.name;
+  const awayWin = winner && match?.away?.name && winner===match.away.name;
+
+  ap(parent,
+    se('rect',{x:bx,y:by,width:BOX_W,height:BOX_H,rx:7,
+      fill:C.boxBg,
+      stroke:(homeWin||awayWin)?C.borderW:C.border,
+      'stroke-width':(homeWin||awayWin)?2.2:1.2}),
+    se('line',{x1:bx,y1:by+ROW_H,x2:bx+BOX_W,y2:by+ROW_H,
+      stroke:'rgba(255,255,255,0.12)','stroke-width':1})
+  );
+
+  function drawRow(team, ry, isWin, isElim) {
+    const name = team?.name || null;
+    let ph     = team?.placeholder || 'TBD';
+    if (/^Vincente/i.test(ph)) ph = 'Vincente';
+    else if (/^Perdente/i.test(ph)) ph = 'Perdente';
+    const flag = team?.flag || FLAG_FB;
+    const op   = isElim ? 0.28 : 1;
+    const g    = se('g',{opacity:op});
+
+    if (isWin) ap(g, se('rect',{x:bx,y:ry,width:BOX_W,height:ROW_H,fill:C.winBg}));
+
+    const fcx = bx + 10 + FLAG_R;
+    const fcy = ry + ROW_H/2;
+    const cid = 'f'+(++_cn);
+    ap(defs, ap(se('clipPath',{id:cid}), se('circle',{cx:fcx,cy:fcy,r:FLAG_R})));
+
+    if (name) {
+      ap(g,
+        se('circle',{cx:fcx,cy:fcy,r:FLAG_R+2,
+          fill:'none', stroke:isWin?C.gold:C.border,
+          'stroke-width':isWin?2.5:1.3}),
+        ap(se('g',{'clip-path':`url(#${cid})`}), (()=>{
+          const img=se('image',{
+            href:flag, x:fcx-FLAG_R, y:fcy-FLAG_R,
+            width:FLAG_R*2, height:FLAG_R*2,
+            preserveAspectRatio:'xMidYMid slice'
+          });
+          img.setAttribute('onerror',`this.setAttribute('href','${FLAG_FB}')`);
+          return img;
+        })())
+      );
+    } else {
+      ap(g,
+        se('circle',{cx:fcx,cy:fcy,r:FLAG_R,fill:'rgba(255,255,255,0.05)',stroke:C.muted,'stroke-width':1.3}),
+        st('?',{x:fcx,y:fcy+6,'text-anchor':'middle','font-size':18,fill:C.muted,'font-weight':800})
+      );
+    }
+
+    const tx = bx + 10 + FLAG_R*2 + 16;
+    const tw = BOX_W - (10+FLAG_R*2+16) - 8;
+    const tcid = 'n'+(++_cn);
+    ap(defs, ap(se('clipPath',{id:tcid}), se('rect',{x:tx,y:ry,width:tw,height:ROW_H})));
+    ap(g, st(name||ph, {
+      x:tx, y:ry+ROW_H/2+7,
+      'font-size': name?20:16,
+      fill: name?(isWin?C.gold2:C.white):C.gold2,
+      'font-weight': name?(isWin?800:600):800,
+      'clip-path':`url(#${tcid})`
+    }));
+
+    parent.appendChild(g);
+  }
+
+  drawRow(match?.home, by,       homeWin, !homeWin&&awayWin);
+  drawRow(match?.away, by+ROW_H, awayWin, !awayWin&&homeWin);
+}
+
+// ── Box ORIZZONTALE (Finale / 3°posto): 2 squadre affiancate ────
+function drawHBox(parent, defs, match, bx, by) {
+  const winner = match?.winner || null;
+  const homeWin = winner && match?.home?.name && winner===match.home.name;
+  const awayWin = winner && match?.away?.name && winner===match.away.name;
+  const halfW = FINAL_W/2;
+
+  ap(parent,
+    se('rect',{x:bx,y:by,width:FINAL_W,height:FINAL_H,rx:8,
+      fill:C.boxBg,
+      stroke:(homeWin||awayWin)?C.borderW:C.border,
+      'stroke-width':(homeWin||awayWin)?2.4:1.4}),
+    se('line',{x1:bx+halfW,y1:by,x2:bx+halfW,y2:by+FINAL_H,
+      stroke:'rgba(255,255,255,0.14)','stroke-width':1}),
+    st('VS',{x:bx+halfW,y:by+FINAL_H/2+6,'text-anchor':'middle',
+      'font-size':14,fill:'rgba(255,255,255,0.30)','font-weight':800})
+  );
+
+  function drawSide(team, side, isWin, isElim) {
+    const name = team?.name || null;
+    let ph     = team?.placeholder || 'TBD';
+    if (/^Vincente/i.test(ph)) ph = 'Vincente';
+    else if (/^Perdente/i.test(ph)) ph = 'Perdente';
+    const flag = team?.flag || FLAG_FB;
+    const op   = isElim ? 0.3 : 1;
+    const g = se('g',{opacity:op});
+    const cx0 = side==='L' ? bx : bx+halfW;
+
+    if (isWin) ap(g, se('rect',{x:cx0,y:by,width:halfW,height:FINAL_H,fill:C.winBg}));
+
+    const fcy = by + FINAL_H/2 - 12;
+    const fcx = cx0 + halfW/2;
+    const cid = 'hf'+(++_cn);
+    ap(defs, ap(se('clipPath',{id:cid}), se('circle',{cx:fcx,cy:fcy,r:FLAG_R+2})));
+
+    if (name) {
+      ap(g,
+        se('circle',{cx:fcx,cy:fcy,r:FLAG_R+4,fill:'none',
+          stroke:isWin?C.gold:C.border,'stroke-width':isWin?2.5:1.3}),
+        ap(se('g',{'clip-path':`url(#${cid})`}),(()=>{
+          const img=se('image',{href:flag,x:fcx-FLAG_R-2,y:fcy-FLAG_R-2,
+            width:(FLAG_R+2)*2,height:(FLAG_R+2)*2,preserveAspectRatio:'xMidYMid slice'});
+          img.setAttribute('onerror',`this.setAttribute('href','${FLAG_FB}')`);
+          return img;
+        })())
+      );
+    } else {
+      ap(g,
+        se('circle',{cx:fcx,cy:fcy,r:FLAG_R+2,fill:'rgba(255,255,255,0.05)',stroke:C.muted,'stroke-width':1.3}),
+        st('?',{x:fcx,y:fcy+6,'text-anchor':'middle','font-size':18,fill:C.muted,'font-weight':800})
+      );
+    }
+
+    const tcid = 'ht'+(++_cn);
+    ap(defs, ap(se('clipPath',{id:tcid}), se('rect',{x:cx0+4,y:by+FINAL_H-26,width:halfW-8,height:22})));
+    ap(g, st(name||ph,{
+      x:fcx, y:by+FINAL_H-10,
+      'text-anchor':'middle',
+      'font-size': name?16:13,
+      fill: name?(isWin?C.gold2:C.white):C.gold2,
+      'font-weight': 800,
+      'clip-path':`url(#${tcid})`
+    }));
+
+    parent.appendChild(g);
+  }
+
+  drawSide(match?.home,'L', homeWin, !homeWin&&awayWin);
+  drawSide(match?.away,'R', awayWin, !awayWin&&homeWin);
+}
+
+// ── Box singolo vincitore (Campione / 3° posto) ─────────────────
+function drawWinnerBox(parent, defs, y, teamName, teamFlag, accentColor) {
+  const bx = CX - WINNER_W/2;
+  const by = y;
+
+  ap(parent, se('rect',{
+    x:bx, y:by, width:WINNER_W, height:WINNER_H, rx:8,
+    fill:'rgba(8,8,24,0.85)',
+    stroke: teamName ? accentColor : C.border,
+    'stroke-width': teamName ? 2.6 : 1.4
+  }));
+
+  if (teamName) {
+    const fcx = bx + 34, fcy = by + WINNER_H/2;
+    const cid = 'wb'+(++_cn);
+    ap(defs, ap(se('clipPath',{id:cid}), se('circle',{cx:fcx,cy:fcy,r:FLAG_R+1})));
+    ap(parent,
+      se('circle',{cx:fcx,cy:fcy,r:FLAG_R+3,fill:'none',stroke:accentColor,'stroke-width':2.5}),
+      ap(se('g',{'clip-path':`url(#${cid})`}),(()=>{
+        const img=se('image',{href:teamFlag||FLAG_FB,x:fcx-FLAG_R-1,y:fcy-FLAG_R-1,
+          width:(FLAG_R+1)*2,height:(FLAG_R+1)*2,preserveAspectRatio:'xMidYMid slice'});
+        img.setAttribute('onerror',`this.setAttribute('href','${FLAG_FB}')`);
+        return img;
+      })()),
+      st(teamName,{x:fcx+34,y:fcy+7,'font-size':22,fill:accentColor==C.gold?C.gold2:C.bronze2,'font-weight':900})
+    );
+  } else {
+    ap(parent,
+      se('circle',{cx:bx+34,cy:by+WINNER_H/2,r:FLAG_R+1,fill:'rgba(255,255,255,0.05)',stroke:C.muted,'stroke-width':1.3}),
+      st('?',{x:bx+34,y:by+WINNER_H/2+6,'text-anchor':'middle','font-size':18,fill:C.muted,'font-weight':800}),
+      st('Da determinare',{x:bx+68,y:by+WINNER_H/2+6,'font-size':16,fill:C.muted,'font-style':'italic','font-weight':600})
+    );
+  }
+}
+
+// ── Connettori con bordo rosso e centro blu notte ────────────────
+function hline(g, x1, x2, y) {
+  ap(g,
+    se('line',{x1,y1:y,x2,y2:y,stroke:C.lineEdge,'stroke-width':5.5,'stroke-linecap':'round'}),
+    se('line',{x1,y1:y,x2,y2:y,stroke:C.line,'stroke-width':2.6,'stroke-linecap':'round'})
+  );
+}
+function vline(g, x, y1, y2) {
+  ap(g,
+    se('line',{x1:x,y1,x2:x,y2,stroke:C.lineEdge,'stroke-width':5.5,'stroke-linecap':'round'}),
+    se('line',{x1:x,y1,x2:x,y2,stroke:C.line,'stroke-width':2.6,'stroke-linecap':'round'})
+  );
+}
+function pathConn(g, d) {
+  ap(g,
+    se('path',{d, stroke:C.lineEdge,'stroke-width':5.5,fill:'none','stroke-linecap':'round'}),
+    se('path',{d, stroke:C.line,'stroke-width':2.6,fill:'none','stroke-linecap':'round'})
+  );
+}
+function colLabel(g, label, cx, y) {
+  ap(g,
+    st(label,{x:cx,y,'text-anchor':'middle','font-size':26,
+      fill:C.navyText,'font-weight':900,'letter-spacing':3.5,
+      stroke:'rgba(255,255,255,0.5)','stroke-width':0.7})
+  );
+}
+
+// ── SVG principale ────────────────────────────────────────────
+function buildSVG(data) {
+  const b   = data.bracket;
+  const r32 = b.round_of_32    || [];
+  const r16 = b.round_of_16    || [];
+  const qf  = b.quarter_finals || [];
+  const sf  = b.semi_finals    || [];
+  const tp  = b.third_place;
+  const fin = b.final;
+
+  const svg = se('svg',{viewBox:`0 0 ${VW} ${VH}`,xmlns:NS,
+    style:'display:block;width:100%;height:auto'});
+
+  const defs = se('defs');
+  svg.appendChild(defs);
+
+  const bgImg = se('image',{href:'assets/bg.jpg',x:0,y:0,width:VW,height:VH,
+    preserveAspectRatio:'xMidYMid slice'});
+  svg.appendChild(bgImg);
+  svg.appendChild(se('rect',{x:0,y:0,width:VW,height:VH,fill:'rgba(20,22,35,0.48)'}));
+
+  const gL = se('g',{id:'lines'});
+  const gB = se('g',{id:'boxes'});
+  const gT = se('g',{id:'top'});
+  ap(svg, gL, gB, gT);
+
+  // ── Etichette fase CORRETTE ──────────────────────────────────
+  // R32 (16 match) = SEDICESIMI, R16 (8 match) = OTTAVI, QF = QUARTI, SF = SEMIFINALI
+  // Nessuna etichetta "FINALE" qui in alto: la finale ha la sua label dedicata vicino al box
+  const LY = TOP_PAD - 18;
+  colLabel(gT,'SEDICESIMI', X.r32L+BOX_W/2, LY);
+  colLabel(gT,'OTTAVI',     X.r16L+BOX_W/2, LY);
+  colLabel(gT,'QUARTI',     X.qfL +BOX_W/2, LY);
+  colLabel(gT,'SEMIFINALI', X.sfL +BOX_W/2, LY);
+  colLabel(gT,'SEMIFINALI', X.sfR +BOX_W/2, LY);
+  colLabel(gT,'QUARTI',     X.qfR +BOX_W/2, LY);
+  colLabel(gT,'OTTAVI',     X.r16R+BOX_W/2, LY);
+  colLabel(gT,'SEDICESIMI', X.r32R+BOX_W/2, LY);
+
+  // ── Costruisci mappa Y reale basata sui riferimenti matchNumber ──
+  const yMap = buildMatchYMap(r32, r16, qf, sf);
+
+  // Helper: trova il/i matchNumber che alimentano un dato match (per i connettori)
+  const winnerOriginMap = {};
+  r32.forEach(m => { if (m.winner) winnerOriginMap[m.winner] = m.matchNumber; });
+  function feedersOf(m, originMap) {
+    function originOf(side) {
+      const ph = side?.placeholder || '';
+      const mm = ph.match(/Match (\d+)/);
+      if (mm) return parseInt(mm[1],10);
+      if (side?.name && originMap[side.name] !== undefined) return originMap[side.name];
+      return null;
+    }
+    return [originOf(m.home), originOf(m.away)].filter(n => n !== null);
+  }
+
+  // ── LATO SINISTRO ═══════════════════════════════════════════
+  // R32: 8 match in slot fissi (0..7), metà sinistra dell'array (indici 0-7)
+  for (let i=0;i<8;i++) {
+    drawBox(gB, defs, r32[i], X.r32L, slotY(i));
+    hline(gL, X.r32L+BOX_W, X.r16L, slotCY(i));
+  }
+
+  // R16 sinistra: i primi 4 match dell'array r16 appartengono al lato sinistro
+  // (la divisione L/R è data dall'ordine del JSON, non dal matchNumber)
+  const r16L_matches = r16.slice(0,4);
+  r16L_matches.forEach(m => {
+    const cy = yMap[m.matchNumber];
+    drawBox(gB, defs, m, X.r16L, cy-BOX_H/2);
+    hline(gL, X.r16L+BOX_W, X.qfL, cy);
+    // Connettore verticale verso i match R32 che lo alimentano
+    const feeders = feedersOf(m, winnerOriginMap).map(n => yMap[n]).filter(y=>y!==undefined);
+    if (feeders.length === 2) vline(gL, X.r16L, Math.min(...feeders), Math.max(...feeders));
+  });
+  r16L_matches.forEach(m => { if (m.winner) winnerOriginMap[m.winner] = m.matchNumber; });
+
+  // QF sinistra: i primi 2 match dell'array qf
+  const qfL_matches = qf.slice(0,2);
+  qfL_matches.forEach(m => {
+    const cy = yMap[m.matchNumber];
+    drawBox(gB, defs, m, X.qfL, cy-BOX_H/2);
+    hline(gL, X.qfL+BOX_W, X.sfL, cy);
+    const feeders = feedersOf(m, winnerOriginMap).map(n => yMap[n]).filter(y=>y!==undefined);
+    if (feeders.length === 2) vline(gL, X.qfL, Math.min(...feeders), Math.max(...feeders));
+  });
+  qfL_matches.forEach(m => { if (m.winner) winnerOriginMap[m.winner] = m.matchNumber; });
+
+  // SF sinistra: sf[0]
+  const sfLY = yMap[sf[0].matchNumber];
+  drawBox(gB, defs, sf[0], X.sfL, sfLY-BOX_H/2);
+  {
+    const feeders = feedersOf(sf[0], winnerOriginMap).map(n => yMap[n]).filter(y=>y!==undefined);
+    if (feeders.length === 2) vline(gL, X.sfL, Math.min(...feeders), Math.max(...feeders));
+  }
+  if (sf[0].winner) winnerOriginMap[sf[0].winner] = sf[0].matchNumber;
+
+  // ── LATO DESTRO ══════════════════════════════════════════════
+  for (let i=0;i<8;i++) {
+    drawBox(gB, defs, r32[8+i], X.r32R, slotY(i));
+    hline(gL, X.r16R+BOX_W, X.r32R, slotCY(i));
+  }
+
+  const r16R_matches = r16.slice(4,8);
+  r16R_matches.forEach(m => {
+    const cy = yMap[m.matchNumber];
+    drawBox(gB, defs, m, X.r16R, cy-BOX_H/2);
+    hline(gL, X.qfR+BOX_W, X.r16R, cy);
+    const feeders = feedersOf(m, winnerOriginMap).map(n => yMap[n]).filter(y=>y!==undefined);
+    if (feeders.length === 2) vline(gL, X.r16R+BOX_W, Math.min(...feeders), Math.max(...feeders));
+  });
+  r16R_matches.forEach(m => { if (m.winner) winnerOriginMap[m.winner] = m.matchNumber; });
+
+  const qfR_matches = qf.slice(2,4);
+  qfR_matches.forEach(m => {
+    const cy = yMap[m.matchNumber];
+    drawBox(gB, defs, m, X.qfR, cy-BOX_H/2);
+    hline(gL, X.sfR+BOX_W, X.qfR, cy);
+    const feeders = feedersOf(m, winnerOriginMap).map(n => yMap[n]).filter(y=>y!==undefined);
+    if (feeders.length === 2) vline(gL, X.qfR+BOX_W, Math.min(...feeders), Math.max(...feeders));
+  });
+  qfR_matches.forEach(m => { if (m.winner) winnerOriginMap[m.winner] = m.matchNumber; });
+
+  const sfRY = yMap[sf[1].matchNumber];
+  drawBox(gB, defs, sf[1], X.sfR, sfRY-BOX_H/2);
+  {
+    const feeders = feedersOf(sf[1], winnerOriginMap).map(n => yMap[n]).filter(y=>y!==undefined);
+    if (feeders.length === 2) vline(gL, X.sfR+BOX_W, Math.min(...feeders), Math.max(...feeders));
+  }
+  if (sf[1].winner) winnerOriginMap[sf[1].winner] = sf[1].matchNumber;
+
+  // ══ CENTRO ══════════════════════════════════════════════════
+  // Nuovo ordine dall'alto: COPPA (grande) → CAMPIONE DEL MONDO →
+  // box vincitore → mini percorso → box Finale orizzontale (centrato)
+  // poi più sotto: MEDAGLIA → box vincitore 3° → mini percorso → box 3°posto orizzontale
+
+  const finBX = CX - FINAL_W/2;
+
+  // ── Trofeo, in alto, ingrandito, nulla sopra ──────────────────
+  const tW = 130, tH = 250;
+  const trophyY = 26;
+  svg.appendChild(se('image',{href:'assets/trophy.png',x:CX-tW/2,y:trophyY,width:tW,height:tH,
+    preserveAspectRatio:'xMidYMid meet'}));
+
+  const champLabelY = trophyY + tH + 36;
+  ap(gT, st('CAMPIONE DEL MONDO',{
+    x:CX, y:champLabelY, 'text-anchor':'middle',
+    'font-size':28, fill:C.gold, 'font-weight':900, 'letter-spacing':5,
+    stroke:C.navyText, 'stroke-width':1.4, 'paint-order':'stroke'
+  }));
+
+  const champBoxY = champLabelY + 20;
+  drawWinnerBox(gB, defs, champBoxY, fin?.winner || null,
+    fin?.winner ? (fin.winner===fin.home?.name ? fin.home.flag : fin.away?.flag) : null,
+    C.gold);
+
+  // Mini percorso: dal box vincitore scende fino al box Finale orizzontale
+  const finCY = champBoxY + WINNER_H + 50 + FINAL_H/2;
+  const finY  = finCY - FINAL_H/2;
+  vline(gL, CX, champBoxY+WINNER_H, finY);
+
+  // Box Finale orizzontale, CENTRATO
+  drawHBox(gB, defs, fin, finBX, finY);
+
+  // Label FINALE sotto il box (non sopra, per non sovrapporsi al percorso)
+  ap(gT, st('FINALE',{
+    x:CX, y:finY+FINAL_H+26, 'text-anchor':'middle',
+    'font-size':17, fill:C.navyText, 'font-weight':900, 'letter-spacing':4,
+    stroke:'rgba(255,255,255,0.5)','stroke-width':0.5
+  }));
+
+  // Connettori da SF sinistra/destra fino al box Finale (ad angolo se necessario)
+  if (Math.abs(sfLY - finCY) > 1) {
+    const midX = (X.sfL+BOX_W + finBX)/2;
+    pathConn(gL, `M${X.sfL+BOX_W},${sfLY} H${midX} V${finCY} H${finBX}`);
+  } else {
+    hline(gL, X.sfL+BOX_W, finBX, finCY);
+  }
+  if (Math.abs(sfRY - finCY) > 1) {
+    const midX2 = (finBX+FINAL_W + X.sfR)/2;
+    pathConn(gL, `M${X.sfR},${sfRY} H${midX2} V${finCY} H${finBX+FINAL_W}`);
+  } else {
+    hline(gL, finBX+FINAL_W, X.sfR, finCY);
+  }
+
+  // ── Blocco 3° posto, molto più in basso ───────────────────────
+  // Ordine: MEDAGLIA → box vincitore 3° → mini percorso → box Finale 3°posto orizzontale
+  const blockGap = 90;
+  const medalSize = 90;
+  const medalY = finY + FINAL_H + blockGap;
+
+  // Immagine medaglia: 1200x680 (disco ritagliato dal nastro), centro circa a
+  // cx=600/1200=50%, cy=340/680=50%, raggio ~350/680≈51.5% dell'altezza.
+  // Clip circolare per eliminare gli angoli bianchi residui dell'immagine sorgente.
+  const medalImgAspect = 1200/680;
+  const medalImgW = medalSize * medalImgAspect;
+  const medalImgX = CX - medalImgW/2;
+  const medalClipId = 'medalClip';
+  ap(defs, ap(se('clipPath',{id:medalClipId}),
+    se('circle',{cx:CX, cy:medalY+medalSize/2, r:medalSize/2})
+  ));
+  svg.appendChild(se('image',{
+    href:'assets/bronze.png',
+    x:medalImgX, y:medalY, width:medalImgW, height:medalSize,
+    preserveAspectRatio:'xMidYMid slice',
+    'clip-path':`url(#${medalClipId})`
+  }));
+
+  const medalLabelY = medalY + medalSize + 30;
+  ap(gT, st('TERZO POSTO',{
+    x:CX, y:medalLabelY, 'text-anchor':'middle',
+    'font-size':22, fill:C.bronze, 'font-weight':900, 'letter-spacing':4,
+    stroke:C.navyText, 'stroke-width':1.2, 'paint-order':'stroke'
+  }));
+
+  const medalBoxY = medalLabelY + 16;
+  const tpWinner = tp?.winner || null;
+  const tpWinnerFlag = tpWinner ? (tpWinner===tp?.home?.name ? tp.home.flag : tp?.away?.flag) : null;
+  drawWinnerBox(gB, defs, medalBoxY, tpWinner, tpWinnerFlag, C.bronze);
+
+  // Mini percorso verso box Finale 3°posto orizzontale
+  const tpCY = medalBoxY + WINNER_H + 40 + FINAL_H/2;
+  const tpY  = tpCY - FINAL_H/2;
+  vline(gL, CX, medalBoxY+WINNER_H, tpY);
+
+  drawHBox(gB, defs, tp, finBX, tpY);
+
+  // Label sotto il box, stesso stile della Finale principale per coerenza e leggibilità
+  ap(gT, st('FINALE',{
+    x:CX, y:tpY+FINAL_H+26, 'text-anchor':'middle',
+    'font-size':17, fill:C.navyText, 'font-weight':900, 'letter-spacing':4,
+    stroke:'rgba(255,255,255,0.5)','stroke-width':0.5
+  }));
+
+  return svg;
+}
+
+// ── Main ─────────────────────────────────────────────────────
+async function load() {
+  const app = document.getElementById('app');
+  try {
+    const res = await fetch('data/worldcup.json?v='+Date.now());
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    app.innerHTML = '';
+    app.appendChild(buildSVG(data));
+  } catch(e) {
+    app.innerHTML = `<div class="error-screen">
+      <div class="et">FIFA WORLD CUP 2026</div>
+      <div>Dati non disponibili.</div>
+      <div style="font-size:12px;opacity:.4;margin-top:6px;">Riprova più tardi.</div>
+    </div>`;
+  }
+}
+
+load();
+</script>
+</body>
+</html>
