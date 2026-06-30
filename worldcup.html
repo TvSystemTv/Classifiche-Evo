@@ -37,15 +37,19 @@
 'use strict';
 
 const C = {
-  gold:    '#c9a84c',
-  gold2:   '#f0d878',
-  white:   '#ffffff',
-  muted:   '#9999bb',
-  boxBg:   'rgba(8,8,24,0.78)',
-  winBg:   'rgba(201,168,76,0.22)',
-  line:    '#5ec8ff',
-  border:  'rgba(255,255,255,0.22)',
-  borderW: '#c9a84c',
+  gold:     '#c9a84c',
+  gold2:    '#f0d878',
+  bronze:   '#cd7f32',
+  bronze2:  '#e8a868',
+  white:    '#ffffff',
+  muted:    '#9999bb',
+  boxBg:    'rgba(8,8,24,0.80)',
+  winBg:    'rgba(201,168,76,0.22)',
+  line:     '#5ec8ff',
+  lineEdge: '#e23b3b',
+  border:   'rgba(255,255,255,0.22)',
+  borderW:  '#c9a84c',
+  navyText: '#0d1b3e',
 };
 const FLAG_FB = 'https://flagcdn.com/w40/un.png';
 const NS = 'http://www.w3.org/2000/svg';
@@ -59,23 +63,28 @@ function se(tag, a={}) {
 function st(text, a={}) { const e=se('text',a); e.textContent=text; return e; }
 function ap(p,...ch) { for(const c of ch) if(c) p.appendChild(c); return p; }
 
-// ── Layout (NO HEADER — guadagnato spazio per box più grandi) ──
+// ── Layout ────────────────────────────────────────────────────
 const VW=1920, VH=1080, CX=960;
-const BOX_W=162, BOX_H=86, ROW_H=43;
-const FLAG_R=17;          // raggio bandiera (diametro 34px)
-const TOP_PAD=56, BOT_PAD=14;
-const SLOT_H = Math.floor((VH - TOP_PAD - BOT_PAD) / 8);  // ~126px
+const BOX_W=178, BOX_H=96, ROW_H=48;
+const FLAG_R=19;
+const TOP_PAD=58, BOT_PAD=14;
+const SLOT_H = Math.floor((VH - TOP_PAD - BOT_PAD) / 8);
+
+const FINAL_W = 240;   // larghezza box orizzontale finale/3°posto
+const FINAL_H = 86;    // altezza box orizzontale (1 riga, 2 colonne)
+const WINNER_W = 250;  // box singolo "Campione/3° posto"
+const WINNER_H = 58;
 
 const X = {
-  r32L: 16,
-  r16L: 202,
-  qfL:  388,
-  sfL:  574,
-  fin:  CX - Math.floor(BOX_W/2),
-  sfR:  VW - 574 - BOX_W,
-  qfR:  VW - 388 - BOX_W,
-  r16R: VW - 202 - BOX_W,
-  r32R: VW - 16  - BOX_W,
+  r32L: 14,
+  r16L: 216,
+  qfL:  418,
+  sfL:  620,
+  fin:  CX - FINAL_W/2,
+  sfR:  VW - 620 - BOX_W,
+  qfR:  VW - 418 - BOX_W,
+  r16R: VW - 216 - BOX_W,
+  r32R: VW - 14  - BOX_W,
 };
 
 function slotY(i)  { return TOP_PAD + i*SLOT_H + Math.floor((SLOT_H-BOX_H)/2); }
@@ -84,7 +93,7 @@ function r16CY(i)  { return (slotCY(2*i)+slotCY(2*i+1))/2; }
 function qfCY(i)   { return (r16CY(2*i)+r16CY(2*i+1))/2; }
 function sfCY()    { return (qfCY(0)+qfCY(1))/2; }
 
-// ── Box match ────────────────────────────────────────────────
+// ── Box match VERTICALE (2 righe impilate) — usato per R32..SF ──
 function drawBox(parent, defs, match, bx, by) {
   const winner = match?.winner || null;
   const homeWin = winner && match?.home?.name && winner===match.home.name;
@@ -102,7 +111,6 @@ function drawBox(parent, defs, match, bx, by) {
   function drawRow(team, ry, isWin, isElim) {
     const name = team?.name || null;
     let ph     = team?.placeholder || 'TBD';
-    // Accorcia "Vincente Match 74" -> "Vincente", "Perdente Match 101" -> "Perdente"
     if (/^Vincente/i.test(ph)) ph = 'Vincente';
     else if (/^Perdente/i.test(ph)) ph = 'Perdente';
     const flag = team?.flag || FLAG_FB;
@@ -111,7 +119,7 @@ function drawBox(parent, defs, match, bx, by) {
 
     if (isWin) ap(g, se('rect',{x:bx,y:ry,width:BOX_W,height:ROW_H,fill:C.winBg}));
 
-    const fcx = bx + 9 + FLAG_R;
+    const fcx = bx + 10 + FLAG_R;
     const fcy = ry + ROW_H/2;
     const cid = 'f'+(++_cn);
     ap(defs, ap(se('clipPath',{id:cid}), se('circle',{cx:fcx,cy:fcy,r:FLAG_R})));
@@ -134,19 +142,18 @@ function drawBox(parent, defs, match, bx, by) {
     } else {
       ap(g,
         se('circle',{cx:fcx,cy:fcy,r:FLAG_R,fill:'rgba(255,255,255,0.05)',stroke:C.muted,'stroke-width':1.3}),
-        st('?',{x:fcx,y:fcy+6,'text-anchor':'middle','font-size':17,fill:C.muted,'font-weight':800})
+        st('?',{x:fcx,y:fcy+6,'text-anchor':'middle','font-size':18,fill:C.muted,'font-weight':800})
       );
     }
 
-    const tx = bx + 9 + FLAG_R*2 + 16;
-    const tw = BOX_W - (9+FLAG_R*2+16) - 7;
+    const tx = bx + 10 + FLAG_R*2 + 16;
+    const tw = BOX_W - (10+FLAG_R*2+16) - 8;
     const tcid = 'n'+(++_cn);
     ap(defs, ap(se('clipPath',{id:tcid}), se('rect',{x:tx,y:ry,width:tw,height:ROW_H})));
     ap(g, st(name||ph, {
       x:tx, y:ry+ROW_H/2+7,
-      'font-size': name?18:15,
+      'font-size': name?20:16,
       fill: name?(isWin?C.gold2:C.white):C.gold2,
-      'font-style': 'normal',
       'font-weight': name?(isWin?800:600):800,
       'clip-path':`url(#${tcid})`
     }));
@@ -158,16 +165,131 @@ function drawBox(parent, defs, match, bx, by) {
   drawRow(match?.away, by+ROW_H, awayWin, !awayWin&&homeWin);
 }
 
-// ── Connettori ────────────────────────────────────────────────
+// ── Box ORIZZONTALE (Finale / 3°posto): 2 squadre affiancate ────
+function drawHBox(parent, defs, match, bx, by) {
+  const winner = match?.winner || null;
+  const homeWin = winner && match?.home?.name && winner===match.home.name;
+  const awayWin = winner && match?.away?.name && winner===match.away.name;
+  const halfW = FINAL_W/2;
+
+  ap(parent,
+    se('rect',{x:bx,y:by,width:FINAL_W,height:FINAL_H,rx:8,
+      fill:C.boxBg,
+      stroke:(homeWin||awayWin)?C.borderW:C.border,
+      'stroke-width':(homeWin||awayWin)?2.4:1.4}),
+    se('line',{x1:bx+halfW,y1:by,x2:bx+halfW,y2:by+FINAL_H,
+      stroke:'rgba(255,255,255,0.14)','stroke-width':1}),
+    st('VS',{x:bx+halfW,y:by+FINAL_H/2+6,'text-anchor':'middle',
+      'font-size':14,fill:'rgba(255,255,255,0.30)','font-weight':800})
+  );
+
+  function drawSide(team, side, isWin, isElim) {
+    const name = team?.name || null;
+    let ph     = team?.placeholder || 'TBD';
+    if (/^Vincente/i.test(ph)) ph = 'Vincente';
+    else if (/^Perdente/i.test(ph)) ph = 'Perdente';
+    const flag = team?.flag || FLAG_FB;
+    const op   = isElim ? 0.3 : 1;
+    const g = se('g',{opacity:op});
+    const cx0 = side==='L' ? bx : bx+halfW;
+
+    if (isWin) ap(g, se('rect',{x:cx0,y:by,width:halfW,height:FINAL_H,fill:C.winBg}));
+
+    const fcy = by + FINAL_H/2 - 12;
+    const fcx = cx0 + halfW/2;
+    const cid = 'hf'+(++_cn);
+    ap(defs, ap(se('clipPath',{id:cid}), se('circle',{cx:fcx,cy:fcy,r:FLAG_R+2})));
+
+    if (name) {
+      ap(g,
+        se('circle',{cx:fcx,cy:fcy,r:FLAG_R+4,fill:'none',
+          stroke:isWin?C.gold:C.border,'stroke-width':isWin?2.5:1.3}),
+        ap(se('g',{'clip-path':`url(#${cid})`}),(()=>{
+          const img=se('image',{href:flag,x:fcx-FLAG_R-2,y:fcy-FLAG_R-2,
+            width:(FLAG_R+2)*2,height:(FLAG_R+2)*2,preserveAspectRatio:'xMidYMid slice'});
+          img.setAttribute('onerror',`this.setAttribute('href','${FLAG_FB}')`);
+          return img;
+        })())
+      );
+    } else {
+      ap(g,
+        se('circle',{cx:fcx,cy:fcy,r:FLAG_R+2,fill:'rgba(255,255,255,0.05)',stroke:C.muted,'stroke-width':1.3}),
+        st('?',{x:fcx,y:fcy+6,'text-anchor':'middle','font-size':18,fill:C.muted,'font-weight':800})
+      );
+    }
+
+    const tcid = 'ht'+(++_cn);
+    ap(defs, ap(se('clipPath',{id:tcid}), se('rect',{x:cx0+4,y:by+FINAL_H-26,width:halfW-8,height:22})));
+    ap(g, st(name||ph,{
+      x:fcx, y:by+FINAL_H-10,
+      'text-anchor':'middle',
+      'font-size': name?16:13,
+      fill: name?(isWin?C.gold2:C.white):C.gold2,
+      'font-weight': 800,
+      'clip-path':`url(#${tcid})`
+    }));
+
+    parent.appendChild(g);
+  }
+
+  drawSide(match?.home,'L', homeWin, !homeWin&&awayWin);
+  drawSide(match?.away,'R', awayWin, !awayWin&&homeWin);
+}
+
+// ── Box singolo vincitore (Campione / 3° posto) ─────────────────
+function drawWinnerBox(parent, defs, label, teamName, teamFlag, accentColor) {
+  const bx = CX - WINNER_W/2;
+  const by = label.y;
+
+  ap(parent, se('rect',{
+    x:bx, y:by, width:WINNER_W, height:WINNER_H, rx:8,
+    fill:'rgba(8,8,24,0.85)',
+    stroke: teamName ? accentColor : C.border,
+    'stroke-width': teamName ? 2.6 : 1.4
+  }));
+
+  if (teamName) {
+    const fcx = bx + 34, fcy = by + WINNER_H/2;
+    const cid = 'wb'+(++_cn);
+    ap(defs, ap(se('clipPath',{id:cid}), se('circle',{cx:fcx,cy:fcy,r:FLAG_R+1})));
+    ap(parent,
+      se('circle',{cx:fcx,cy:fcy,r:FLAG_R+3,fill:'none',stroke:accentColor,'stroke-width':2.5}),
+      ap(se('g',{'clip-path':`url(#${cid})`}),(()=>{
+        const img=se('image',{href:teamFlag||FLAG_FB,x:fcx-FLAG_R-1,y:fcy-FLAG_R-1,
+          width:(FLAG_R+1)*2,height:(FLAG_R+1)*2,preserveAspectRatio:'xMidYMid slice'});
+        img.setAttribute('onerror',`this.setAttribute('href','${FLAG_FB}')`);
+        return img;
+      })()),
+      st(teamName,{x:fcx+34,y:fcy+7,'font-size':22,fill:accentColor==C.gold?C.gold2:C.bronze2,'font-weight':900})
+    );
+  } else {
+    ap(parent,
+      se('circle',{cx:bx+34,cy:by+WINNER_H/2,r:FLAG_R+1,fill:'rgba(255,255,255,0.05)',stroke:C.muted,'stroke-width':1.3}),
+      st('?',{x:bx+34,y:by+WINNER_H/2+6,'text-anchor':'middle','font-size':18,fill:C.muted,'font-weight':800}),
+      st('Da determinare',{x:bx+68,y:by+WINNER_H/2+6,'font-size':16,fill:C.muted,'font-style':'italic','font-weight':600})
+    );
+  }
+}
+
+// ── Connettori con bordo rosso ───────────────────────────────────
 function hline(g, x1, x2, y) {
-  ap(g, se('line',{x1,y1:y,x2,y2:y,stroke:C.line,'stroke-width':2,'stroke-linecap':'round'}));
+  ap(g,
+    se('line',{x1,y1:y,x2,y2:y,stroke:C.lineEdge,'stroke-width':5.5,'stroke-linecap':'round'}),
+    se('line',{x1,y1:y,x2,y2:y,stroke:C.line,'stroke-width':2.6,'stroke-linecap':'round'})
+  );
 }
 function vline(g, x, y1, y2) {
-  ap(g, se('line',{x1:x,y1,x2:x,y2,stroke:C.line,'stroke-width':2,'stroke-linecap':'round'}));
+  ap(g,
+    se('line',{x1:x,y1,x2:x,y2,stroke:C.lineEdge,'stroke-width':5.5,'stroke-linecap':'round'}),
+    se('line',{x1:x,y1,x2:x,y2,stroke:C.line,'stroke-width':2.6,'stroke-linecap':'round'})
+  );
 }
 function colLabel(g, label, cx, y) {
-  ap(g, st(label,{x:cx,y,'text-anchor':'middle','font-size':18,
-    fill:'rgba(255,255,255,0.55)','font-weight':900,'letter-spacing':3.5}));
+  ap(g,
+    st(label,{x:cx,y,'text-anchor':'middle','font-size':21,
+      fill:C.navyText,'font-weight':900,'letter-spacing':3.5,
+      stroke:'rgba(255,255,255,0.5)','stroke-width':0.6})
+  );
 }
 
 // ── SVG principale ────────────────────────────────────────────
@@ -189,20 +311,19 @@ function buildSVG(data) {
   const bgImg = se('image',{href:'assets/bg.jpg',x:0,y:0,width:VW,height:VH,
     preserveAspectRatio:'xMidYMid slice'});
   svg.appendChild(bgImg);
-  svg.appendChild(se('rect',{x:0,y:0,width:VW,height:VH,fill:'rgba(20,22,35,0.45)'}));
+  svg.appendChild(se('rect',{x:0,y:0,width:VW,height:VH,fill:'rgba(20,22,35,0.28)'}));
 
   const gL = se('g',{id:'lines'});
   const gB = se('g',{id:'boxes'});
   const gT = se('g',{id:'top'});
   ap(svg, gL, gB, gT);
 
-  // ── Etichette fase (allineate con la posizione delle colonne) ──
-  const LY = TOP_PAD - 16;
+  // ── Etichette fase ──────────────────────────────────────────
+  const LY = TOP_PAD - 18;
   colLabel(gT,'OTTAVI',    X.r32L+BOX_W/2, LY);
   colLabel(gT,'QUARTI',    X.r16L+BOX_W/2, LY);
   colLabel(gT,'SEMIFINALI',X.qfL +BOX_W/2, LY);
-  colLabel(gT,'FINALE',    X.sfL +BOX_W/2, LY);
-  colLabel(gT,'FINALE',    X.sfR +BOX_W/2, LY);
+  colLabel(gT,'FINALE',    CX, LY);
   colLabel(gT,'SEMIFINALI',X.qfR +BOX_W/2, LY);
   colLabel(gT,'QUARTI',    X.r16R+BOX_W/2, LY);
   colLabel(gT,'OTTAVI',    X.r32R+BOX_W/2, LY);
@@ -228,7 +349,6 @@ function buildSVG(data) {
 
   const sfLY = sfCY();
   drawBox(gB, defs, sf[0], X.sfL, sfLY-BOX_H/2);
-  hline(gL, X.sfL+BOX_W, X.fin, sfLY);
 
   // ══ LATO DESTRO ════════════════════════════════════════════
   for (let i=0;i<8;i++) {
@@ -251,38 +371,94 @@ function buildSVG(data) {
 
   const sfRY = sfCY();
   drawBox(gB, defs, sf[1], X.sfR, sfRY-BOX_H/2);
-  hline(gL, X.fin+BOX_W, X.sfR, sfRY);
 
-  // ══ CENTRO ══════════════════════════════════════════════════
-  const finCY = Math.round(VH*0.34);
-  const finY  = finCY - BOX_H/2;
+  // ══ CENTRO: FINALE → TROFEO → CAMPIONE → ... → 3°POSTO → BRONZO → VINCITORE 3° ══
+  const finCY = 210;
+  const finY  = finCY - FINAL_H/2;
+  const finBX = CX - FINAL_W/2;
 
-  vline(gL, X.fin,       sfLY, finCY);
-  vline(gL, X.fin+BOX_W, sfRY, finCY);
+  // Linee da SF sinistra/destra verso il box Finale orizzontale (path ad angolo)
+  if (Math.abs(sfLY - finCY) > 1) {
+    const midX = (X.sfL+BOX_W + finBX)/2;
+    ap(gL,
+      se('path',{d:`M${X.sfL+BOX_W},${sfLY} H${midX} V${finCY} H${finBX}`,
+        stroke:C.lineEdge,'stroke-width':5.5,fill:'none','stroke-linecap':'round'}),
+      se('path',{d:`M${X.sfL+BOX_W},${sfLY} H${midX} V${finCY} H${finBX}`,
+        stroke:C.line,'stroke-width':2.6,fill:'none','stroke-linecap':'round'})
+    );
+  } else {
+    hline(gL, X.sfL+BOX_W, finBX, finCY);
+  }
+  if (Math.abs(sfRY - finCY) > 1) {
+    const midX2 = (finBX+FINAL_W + X.sfR)/2;
+    ap(gL,
+      se('path',{d:`M${X.sfR},${sfRY} H${midX2} V${finCY} H${finBX+FINAL_W}`,
+        stroke:C.lineEdge,'stroke-width':5.5,fill:'none','stroke-linecap':'round'}),
+      se('path',{d:`M${X.sfR},${sfRY} H${midX2} V${finCY} H${finBX+FINAL_W}`,
+        stroke:C.line,'stroke-width':2.6,fill:'none','stroke-linecap':'round'})
+    );
+  } else {
+    hline(gL, finBX+FINAL_W, X.sfR, finCY);
+  }
 
+  // Label FINALE sopra il box
+  ap(gT, st('FINALE',{
+    x:CX, y:finY-18, 'text-anchor':'middle',
+    'font-size':19, fill:C.navyText, 'font-weight':900, 'letter-spacing':4,
+    stroke:'rgba(255,255,255,0.5)','stroke-width':0.6
+  }));
+
+  // Box Finale orizzontale
+  drawHBox(gB, defs, fin, finBX, finY);
+
+  // Linea verticale Finale → Trofeo
+  const tW=110, tH=210;
+  const tY = finY + FINAL_H + 16;
+  vline(gL, CX, finY+FINAL_H, tY);
+
+  // Trofeo
+  svg.appendChild(se('image',{href:'assets/trophy.png',x:CX-tW/2,y:tY,width:tW,height:tH,
+    preserveAspectRatio:'xMidYMid meet'}));
+
+  // "CAMPIONE DEL MONDO" — grande, bordo blu scuro
+  const champLabelY = tY + tH + 34;
   ap(gT, st('CAMPIONE DEL MONDO',{
-    x:CX,y:finY-26,'text-anchor':'middle',
-    'font-size':21,fill:C.gold,'font-weight':900,'letter-spacing':5
+    x:CX, y:champLabelY, 'text-anchor':'middle',
+    'font-size':28, fill:C.gold, 'font-weight':900, 'letter-spacing':5,
+    stroke:C.navyText, 'stroke-width':1.4, 'paint-order':'stroke'
   }));
 
-  drawBox(gB, defs, fin, X.fin, finY);
+  // Box singolo vincitore CAMPIONE
+  const champBoxY = champLabelY + 22;
+  drawWinnerBox(gB, defs, {y:champBoxY}, fin?.winner || null,
+    fin?.winner ? (fin.winner===fin.home?.name ? fin.home.flag : fin.away?.flag) : null,
+    C.gold);
 
-  const tW=100, tH=200;
-  const tY = finY + BOX_H + 14;
-  const tImg = se('image',{
-    href:'assets/trophy.png',
-    x:CX-tW/2, y:tY, width:tW, height:tH,
-    preserveAspectRatio:'xMidYMid meet'
-  });
-  svg.appendChild(tImg);
+  // ── 3° POSTO — molto più in basso ──────────────────────────
+  const tpCY = champBoxY + WINNER_H + 140;
+  const tpY  = tpCY - FINAL_H/2;
 
-  const tpLabelY = tY + tH + 14;
-  const tpY = tpLabelY + 14;
   ap(gT, st('FINALE 3° POSTO',{
-    x:CX,y:tpLabelY,'text-anchor':'middle',
-    'font-size':14,fill:'rgba(255,255,255,0.55)','font-weight':800,'letter-spacing':2.5
+    x:CX, y:tpY-16, 'text-anchor':'middle',
+    'font-size':16, fill:C.navyText, 'font-weight':900, 'letter-spacing':3,
+    stroke:'rgba(255,255,255,0.5)','stroke-width':0.5
   }));
-  drawBox(gB, defs, tp, X.fin, tpY);
+
+  drawHBox(gB, defs, tp, finBX, tpY);
+
+  // Medaglia di bronzo (cerchio SVG, nessun asset esterno necessario)
+  const medCY = tpY + FINAL_H + 46;
+  ap(gB,
+    se('circle',{cx:CX,cy:medCY,r:34,fill:C.bronze,stroke:C.bronze2,'stroke-width':4}),
+    se('circle',{cx:CX,cy:medCY,r:34,fill:'none',stroke:'rgba(0,0,0,0.25)','stroke-width':1.5}),
+    st('3°',{x:CX,y:medCY+9,'text-anchor':'middle','font-size':24,fill:'#3a2410','font-weight':900})
+  );
+
+  // Box vincitore 3° posto
+  const tpWinnerY = medCY + 50;
+  const tpWinner = tp?.winner || null;
+  const tpWinnerFlag = tpWinner ? (tpWinner===tp.home?.name ? tp.home.flag : tp.away?.flag) : null;
+  drawWinnerBox(gB, defs, {y:tpWinnerY}, tpWinner, tpWinnerFlag, C.bronze);
 
   return svg;
 }
