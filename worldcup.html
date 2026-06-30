@@ -317,7 +317,7 @@ function buildSVG(data) {
   const bgImg = se('image',{href:'assets/bg.jpg',x:0,y:0,width:VW,height:VH,
     preserveAspectRatio:'xMidYMid slice'});
   svg.appendChild(bgImg);
-  svg.appendChild(se('rect',{x:0,y:0,width:VW,height:VH,fill:'rgba(20,22,35,0.28)'}));
+  svg.appendChild(se('rect',{x:0,y:0,width:VW,height:VH,fill:'rgba(20,22,35,0.48)'}));
 
   const gL = se('g',{id:'lines'});
   const gB = se('g',{id:'boxes'});
@@ -332,8 +332,9 @@ function buildSVG(data) {
   colLabel(gT,'OTTAVI',     X.r16L+BOX_W/2, LY);
   colLabel(gT,'QUARTI',     X.qfL +BOX_W/2, LY);
   colLabel(gT,'SEMIFINALI', X.sfL +BOX_W/2, LY);
-  colLabel(gT,'SEMIFINALI', X.qfR +BOX_W/2, LY);
-  colLabel(gT,'QUARTI',     X.r16R+BOX_W/2, LY);
+  colLabel(gT,'SEMIFINALI', X.sfR +BOX_W/2, LY);
+  colLabel(gT,'QUARTI',     X.qfR +BOX_W/2, LY);
+  colLabel(gT,'OTTAVI',     X.r16R+BOX_W/2, LY);
   colLabel(gT,'SEDICESIMI', X.r32R+BOX_W/2, LY);
 
   // ══ LATO SINISTRO ══════════════════════════════════════════
@@ -410,15 +411,15 @@ function buildSVG(data) {
   const finY  = finCY - FINAL_H/2;
   vline(gL, CX, champBoxY+WINNER_H, finY);
 
-  // Label FINALE accanto al box (sopra di esso)
+  // Box Finale orizzontale, CENTRATO
+  drawHBox(gB, defs, fin, finBX, finY);
+
+  // Label FINALE sotto il box (non sopra, per non sovrapporsi al percorso)
   ap(gT, st('FINALE',{
-    x:CX, y:finY-16, 'text-anchor':'middle',
+    x:CX, y:finY+FINAL_H+26, 'text-anchor':'middle',
     'font-size':17, fill:C.navyText, 'font-weight':900, 'letter-spacing':4,
     stroke:'rgba(255,255,255,0.5)','stroke-width':0.5
   }));
-
-  // Box Finale orizzontale, CENTRATO
-  drawHBox(gB, defs, fin, finBX, finY);
 
   // Connettori da SF sinistra/destra fino al box Finale (ad angolo se necessario)
   if (Math.abs(sfLY - finCY) > 1) {
@@ -474,13 +475,14 @@ function buildSVG(data) {
   const tpY  = tpCY - FINAL_H/2;
   vline(gL, CX, medalBoxY+WINNER_H, tpY);
 
+  drawHBox(gB, defs, tp, finBX, tpY);
+
+  // Label sotto il box (non sopra, per non sovrapporsi al percorso)
   ap(gT, st('FINALE 3° POSTO',{
-    x:CX, y:tpY-14, 'text-anchor':'middle',
+    x:CX, y:tpY+FINAL_H+24, 'text-anchor':'middle',
     'font-size':15, fill:C.navyText, 'font-weight':900, 'letter-spacing':3,
     stroke:'rgba(255,255,255,0.5)','stroke-width':0.5
   }));
-
-  drawHBox(gB, defs, tp, finBX, tpY);
 
   return svg;
 }
