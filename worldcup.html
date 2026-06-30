@@ -90,52 +90,60 @@ const X = {
 function slotY(i)  { return TOP_PAD + i*SLOT_H + Math.floor((SLOT_H-BOX_H)/2); }
 function slotCY(i) { return slotY(i) + BOX_H/2; }
 
-// ── Mappatura dinamica matchNumber → posizione Y ────────────────
-// Il bracket FIFA non segue un ordine sequenziale 2i/2i+1: gli accoppiamenti
-// reali sono intrecciati (es. R16 #90 unisce i vincitori dei match 73 e 75,
-// non 73-74). Quindi ricaviamo i riferimenti veri leggendo i placeholder
-// "Vincente Match N" / "Perdente Match N" di ciascun match, e calcoliamo
-// la sua Y come media delle Y dei match che lo alimentano.
-
-function buildMatchYMap(r32, r16, qf, sf) {
-  const yMap = {}; // matchNumber -> centerY
-  const winnerOrigin = {}; // teamName -> matchNumber che l'ha generata come vincitrice
-
-  // R32: posizione fissa in 8 slot verticali, condivisi da lato sinistro
-  // (indici 0-7) e lato destro (indici 8-15, stessa Y del rispettivo i%8)
-  r32.forEach((m,i) => {
-    yMap[m.matchNumber] = slotCY(i % 8);
-    if (m.winner) winnerOrigin[m.winner] = m.matchNumber;
-  });
-
-  // Per un lato del match, trova il matchNumber che lo alimenta:
-  // - se è un placeholder "Vincente/Perdente Match N" → N
-  // - se è una squadra reale già nota → matchNumber che l'ha prodotta come vincitrice
-  function sideOriginMatch(side) {
-    const ph = side?.placeholder || '';
-    const m = ph.match(/Match (\d+)/);
-    if (m) return parseInt(m[1],10);
-    if (side?.name && winnerOrigin[side.name] !== undefined) return winnerOrigin[side.name];
-    return null;
-  }
-
-  function resolveRound(round) {
-    round.forEach(m => {
-      const refs = [sideOriginMatch(m.home), sideOriginMatch(m.away)]
-        .filter(n => n !== null);
-      const ys = refs.map(n => yMap[n]).filter(y => y !== undefined);
-      if (ys.length > 0) {
-        yMap[m.matchNumber] = ys.reduce((a,b)=>a+b,0) / ys.length;
+// ── Riordino ad albero binario per POSIZIONE REALE ──────────────
+// L'array del JSON non è garantito in ordine "binario pulito" (qf[1] può
+// alimentare da r16[4]+r16[5] invece che da r16[2]+r16[3]). Per evitare
+// sovrapposizioni nel disegno, riordiniamo ogni round in modo che ogni
+// coppia consecutiva (0+1, 2+3, ...) corrisponda davvero ai due match che
+// alimentano lo stesso match del round successivo. L'ordinamento si basa
+// sulla posizione minima dei "genitori" nel round precedente, risolta
+// seguendo i veri matchNumber nei placeholder o nei winner.
+function originMatchNums(m, prevByNum) {
+  const refs = [];
+  for (const side of ['home','away']) {
+    const ph = m[side]?.placeholder || '';
+    const mm = ph.match(/Match (\d+)/);
+    if (mm) { refs.push(parseInt(mm[1],10)); continue; }
+    const name = m[side]?.name;
+    if (name) {
+      for (const numStr in prevByNum) {
+        if (prevByNum[numStr].winner === name) { refs.push(parseInt(numStr,10)); break; }
       }
-      if (m.winner) winnerOrigin[m.winner] = m.matchNumber;
-    });
+    }
   }
+  return refs;
+}
 
-  resolveRound(r16);
-  resolveRound(qf);
-  resolveRound(sf);
+function reorderRound(round, prevRound, prevPosMap) {
+  const prevByNum = {};
+  prevRound.forEach(m => { prevByNum[m.matchNumber] = m; });
 
-  return yMap;
+  const keyed = round.map(m => {
+    const refs = originMatchNums(m, prevByNum);
+    const positions = refs.map(r => prevPosMap[r]).filter(p => p !== undefined);
+    const key = positions.length ? Math.min(...positions) : 999;
+    return { key, m };
+  });
+  keyed.sort((a,b) => a.key - b.key);
+  return keyed.map(k => k.m);
+}
+
+function buildOrderedRounds(r32, r16, qf, sf) {
+  // R32 resta nell'ordine originale (è già la base fissa, 16 slot)
+  const r32pos = {};
+  r32.forEach((m,i) => { r32pos[m.matchNumber] = i; });
+
+  const r16ord = reorderRound(r16, r32, r32pos);
+  const r16pos = {};
+  r16ord.forEach((m,i) => { r16pos[m.matchNumber] = i; });
+
+  const qford = reorderRound(qf, r16ord, r16pos);
+  const qfpos = {};
+  qford.forEach((m,i) => { qfpos[m.matchNumber] = i; });
+
+  const sford = reorderRound(sf, qford, qfpos);
+
+  return { r32, r16: r16ord, qf: qford, sf: sford };
 }
 
 // ── Box match VERTICALE (2 righe impilate) — usato per R32..SF ──
@@ -345,13 +353,15 @@ function colLabel(g, label, cx, y) {
 
 // ── SVG principale ────────────────────────────────────────────
 function buildSVG(data) {
-  const b   = data.bracket;
-  const r32 = b.round_of_32    || [];
-  const r16 = b.round_of_16    || [];
-  const qf  = b.quarter_finals || [];
-  const sf  = b.semi_finals    || [];
-  const tp  = b.third_place;
-  const fin = b.final;
+  const ord = buildOrderedRounds(
+    data.bracket.round_of_32    || [],
+    data.bracket.round_of_16    || [],
+    data.bracket.quarter_finals || [],
+    data.bracket.semi_finals    || []
+  );
+  const r32 = ord.r32, r16 = ord.r16, qf = ord.qf, sf = ord.sf;
+  const tp  = data.bracket.third_place;
+  const fin = data.bracket.final;
 
   const svg = se('svg',{viewBox:`0 0 ${VW} ${VH}`,xmlns:NS,
     style:'display:block;width:100%;height:auto'});
@@ -369,9 +379,7 @@ function buildSVG(data) {
   const gT = se('g',{id:'top'});
   ap(svg, gL, gB, gT);
 
-  // ── Etichette fase CORRETTE ──────────────────────────────────
-  // R32 (16 match) = SEDICESIMI, R16 (8 match) = OTTAVI, QF = QUARTI, SF = SEMIFINALI
-  // Nessuna etichetta "FINALE" qui in alto: la finale ha la sua label dedicata vicino al box
+  // ── Etichette fase ──────────────────────────────────────────
   const LY = TOP_PAD - 18;
   colLabel(gT,'SEDICESIMI', X.r32L+BOX_W/2, LY);
   colLabel(gT,'OTTAVI',     X.r16L+BOX_W/2, LY);
@@ -382,105 +390,68 @@ function buildSVG(data) {
   colLabel(gT,'OTTAVI',     X.r16R+BOX_W/2, LY);
   colLabel(gT,'SEDICESIMI', X.r32R+BOX_W/2, LY);
 
-  // ── Costruisci mappa Y reale basata sui riferimenti matchNumber ──
-  const yMap = buildMatchYMap(r32, r16, qf, sf);
+  // ══ Albero binario fisso per POSIZIONE: 8 slot R32 per lato, ──
+  // ogni round successivo dimezza l'array in ordine (già riordinato
+  // a monte per coerenza reale tramite buildOrderedRounds) ──────
 
-  // Helper: trova il/i matchNumber che alimentano un dato match (per i connettori)
-  const winnerOriginMap = {};
-  r32.forEach(m => { if (m.winner) winnerOriginMap[m.winner] = m.matchNumber; });
-  function feedersOf(m, originMap) {
-    function originOf(side) {
-      const ph = side?.placeholder || '';
-      const mm = ph.match(/Match (\d+)/);
-      if (mm) return parseInt(mm[1],10);
-      if (side?.name && originMap[side.name] !== undefined) return originMap[side.name];
-      return null;
-    }
-    return [originOf(m.home), originOf(m.away)].filter(n => n !== null);
-  }
-
-  // ── LATO SINISTRO ═══════════════════════════════════════════
-  // R32: 8 match in slot fissi (0..7), metà sinistra dell'array (indici 0-7)
+  // ── LATO SINISTRO ════════════════════════════════════════════
   for (let i=0;i<8;i++) {
     drawBox(gB, defs, r32[i], X.r32L, slotY(i));
     hline(gL, X.r32L+BOX_W, X.r16L, slotCY(i));
   }
+  for (let i=0;i<4;i++) vline(gL, X.r16L, slotCY(2*i), slotCY(2*i+1));
 
-  // R16 sinistra: i primi 4 match dell'array r16 appartengono al lato sinistro
-  // (la divisione L/R è data dall'ordine del JSON, non dal matchNumber)
-  const r16L_matches = r16.slice(0,4);
-  r16L_matches.forEach(m => {
-    const cy = yMap[m.matchNumber];
-    drawBox(gB, defs, m, X.r16L, cy-BOX_H/2);
+  function pairCY(getCY, i) { return (getCY(2*i) + getCY(2*i+1)) / 2; }
+  const r16CYL = i => pairCY(slotCY, i);
+
+  for (let i=0;i<4;i++) {
+    const cy = r16CYL(i);
+    drawBox(gB, defs, r16[i], X.r16L, cy-BOX_H/2);
     hline(gL, X.r16L+BOX_W, X.qfL, cy);
-    // Connettore verticale verso i match R32 che lo alimentano
-    const feeders = feedersOf(m, winnerOriginMap).map(n => yMap[n]).filter(y=>y!==undefined);
-    if (feeders.length === 2) vline(gL, X.r16L, Math.min(...feeders), Math.max(...feeders));
-  });
-  r16L_matches.forEach(m => { if (m.winner) winnerOriginMap[m.winner] = m.matchNumber; });
-
-  // QF sinistra: i primi 2 match dell'array qf
-  const qfL_matches = qf.slice(0,2);
-  qfL_matches.forEach(m => {
-    const cy = yMap[m.matchNumber];
-    drawBox(gB, defs, m, X.qfL, cy-BOX_H/2);
-    hline(gL, X.qfL+BOX_W, X.sfL, cy);
-    const feeders = feedersOf(m, winnerOriginMap).map(n => yMap[n]).filter(y=>y!==undefined);
-    if (feeders.length === 2) vline(gL, X.qfL, Math.min(...feeders), Math.max(...feeders));
-  });
-  qfL_matches.forEach(m => { if (m.winner) winnerOriginMap[m.winner] = m.matchNumber; });
-
-  // SF sinistra: sf[0]
-  const sfLY = yMap[sf[0].matchNumber];
-  drawBox(gB, defs, sf[0], X.sfL, sfLY-BOX_H/2);
-  {
-    const feeders = feedersOf(sf[0], winnerOriginMap).map(n => yMap[n]).filter(y=>y!==undefined);
-    if (feeders.length === 2) vline(gL, X.sfL, Math.min(...feeders), Math.max(...feeders));
   }
-  if (sf[0].winner) winnerOriginMap[sf[0].winner] = sf[0].matchNumber;
+  for (let i=0;i<2;i++) vline(gL, X.qfL, r16CYL(2*i), r16CYL(2*i+1));
+
+  const qfCYL = i => pairCY(r16CYL, i);
+  for (let i=0;i<2;i++) {
+    const cy = qfCYL(i);
+    drawBox(gB, defs, qf[i], X.qfL, cy-BOX_H/2);
+    hline(gL, X.qfL+BOX_W, X.sfL, cy);
+  }
+  vline(gL, X.sfL, qfCYL(0), qfCYL(1));
+
+  const sfLY = (qfCYL(0)+qfCYL(1))/2;
+  drawBox(gB, defs, sf[0], X.sfL, sfLY-BOX_H/2);
 
   // ── LATO DESTRO ══════════════════════════════════════════════
   for (let i=0;i<8;i++) {
     drawBox(gB, defs, r32[8+i], X.r32R, slotY(i));
     hline(gL, X.r16R+BOX_W, X.r32R, slotCY(i));
   }
+  for (let i=0;i<4;i++) vline(gL, X.r16R+BOX_W, slotCY(2*i), slotCY(2*i+1));
 
-  const r16R_matches = r16.slice(4,8);
-  r16R_matches.forEach(m => {
-    const cy = yMap[m.matchNumber];
-    drawBox(gB, defs, m, X.r16R, cy-BOX_H/2);
+  const r16CYR = i => pairCY(slotCY, i);
+  for (let i=0;i<4;i++) {
+    const cy = r16CYR(i);
+    drawBox(gB, defs, r16[4+i], X.r16R, cy-BOX_H/2);
     hline(gL, X.qfR+BOX_W, X.r16R, cy);
-    const feeders = feedersOf(m, winnerOriginMap).map(n => yMap[n]).filter(y=>y!==undefined);
-    if (feeders.length === 2) vline(gL, X.r16R+BOX_W, Math.min(...feeders), Math.max(...feeders));
-  });
-  r16R_matches.forEach(m => { if (m.winner) winnerOriginMap[m.winner] = m.matchNumber; });
-
-  const qfR_matches = qf.slice(2,4);
-  qfR_matches.forEach(m => {
-    const cy = yMap[m.matchNumber];
-    drawBox(gB, defs, m, X.qfR, cy-BOX_H/2);
-    hline(gL, X.sfR+BOX_W, X.qfR, cy);
-    const feeders = feedersOf(m, winnerOriginMap).map(n => yMap[n]).filter(y=>y!==undefined);
-    if (feeders.length === 2) vline(gL, X.qfR+BOX_W, Math.min(...feeders), Math.max(...feeders));
-  });
-  qfR_matches.forEach(m => { if (m.winner) winnerOriginMap[m.winner] = m.matchNumber; });
-
-  const sfRY = yMap[sf[1].matchNumber];
-  drawBox(gB, defs, sf[1], X.sfR, sfRY-BOX_H/2);
-  {
-    const feeders = feedersOf(sf[1], winnerOriginMap).map(n => yMap[n]).filter(y=>y!==undefined);
-    if (feeders.length === 2) vline(gL, X.sfR+BOX_W, Math.min(...feeders), Math.max(...feeders));
   }
-  if (sf[1].winner) winnerOriginMap[sf[1].winner] = sf[1].matchNumber;
+  for (let i=0;i<2;i++) vline(gL, X.qfR+BOX_W, r16CYR(2*i), r16CYR(2*i+1));
+
+  const qfCYR = i => pairCY(r16CYR, i);
+  for (let i=0;i<2;i++) {
+    const cy = qfCYR(i);
+    drawBox(gB, defs, qf[2+i], X.qfR, cy-BOX_H/2);
+    hline(gL, X.sfR+BOX_W, X.qfR, cy);
+  }
+  vline(gL, X.sfR+BOX_W, qfCYR(0), qfCYR(1));
+
+  const sfRY = (qfCYR(0)+qfCYR(1))/2;
+  drawBox(gB, defs, sf[1], X.sfR, sfRY-BOX_H/2);
 
   // ══ CENTRO ══════════════════════════════════════════════════
-  // Nuovo ordine dall'alto: COPPA (grande) → CAMPIONE DEL MONDO →
-  // box vincitore → mini percorso → box Finale orizzontale (centrato)
-  // poi più sotto: MEDAGLIA → box vincitore 3° → mini percorso → box 3°posto orizzontale
-
   const finBX = CX - FINAL_W/2;
 
-  // ── Trofeo, in alto, ingrandito, nulla sopra ──────────────────
+  // Trofeo, in alto, ingrandito, nulla sopra
   const tW = 130, tH = 250;
   const trophyY = 26;
   svg.appendChild(se('image',{href:'assets/trophy.png',x:CX-tW/2,y:trophyY,width:tW,height:tH,
@@ -498,22 +469,18 @@ function buildSVG(data) {
     fin?.winner ? (fin.winner===fin.home?.name ? fin.home.flag : fin.away?.flag) : null,
     C.gold);
 
-  // Mini percorso: dal box vincitore scende fino al box Finale orizzontale
   const finCY = champBoxY + WINNER_H + 50 + FINAL_H/2;
   const finY  = finCY - FINAL_H/2;
   vline(gL, CX, champBoxY+WINNER_H, finY);
 
-  // Box Finale orizzontale, CENTRATO
   drawHBox(gB, defs, fin, finBX, finY);
 
-  // Label FINALE sotto il box (non sopra, per non sovrapporsi al percorso)
   ap(gT, st('FINALE',{
     x:CX, y:finY+FINAL_H+26, 'text-anchor':'middle',
     'font-size':17, fill:C.navyText, 'font-weight':900, 'letter-spacing':4,
     stroke:'rgba(255,255,255,0.5)','stroke-width':0.5
   }));
 
-  // Connettori da SF sinistra/destra fino al box Finale (ad angolo se necessario)
   if (Math.abs(sfLY - finCY) > 1) {
     const midX = (X.sfL+BOX_W + finBX)/2;
     pathConn(gL, `M${X.sfL+BOX_W},${sfLY} H${midX} V${finCY} H${finBX}`);
@@ -527,15 +494,11 @@ function buildSVG(data) {
     hline(gL, finBX+FINAL_W, X.sfR, finCY);
   }
 
-  // ── Blocco 3° posto, molto più in basso ───────────────────────
-  // Ordine: MEDAGLIA → box vincitore 3° → mini percorso → box Finale 3°posto orizzontale
+  // ── Blocco 3° posto ─────────────────────────────────────────
   const blockGap = 90;
   const medalSize = 90;
   const medalY = finY + FINAL_H + blockGap;
 
-  // Immagine medaglia: 1200x680 (disco ritagliato dal nastro), centro circa a
-  // cx=600/1200=50%, cy=340/680=50%, raggio ~350/680≈51.5% dell'altezza.
-  // Clip circolare per eliminare gli angoli bianchi residui dell'immagine sorgente.
   const medalImgAspect = 1200/680;
   const medalImgW = medalSize * medalImgAspect;
   const medalImgX = CX - medalImgW/2;
@@ -562,14 +525,12 @@ function buildSVG(data) {
   const tpWinnerFlag = tpWinner ? (tpWinner===tp?.home?.name ? tp.home.flag : tp?.away?.flag) : null;
   drawWinnerBox(gB, defs, medalBoxY, tpWinner, tpWinnerFlag, C.bronze);
 
-  // Mini percorso verso box Finale 3°posto orizzontale
   const tpCY = medalBoxY + WINNER_H + 40 + FINAL_H/2;
   const tpY  = tpCY - FINAL_H/2;
   vline(gL, CX, medalBoxY+WINNER_H, tpY);
 
   drawHBox(gB, defs, tp, finBX, tpY);
 
-  // Label sotto il box, stesso stile della Finale principale per coerenza e leggibilità
   ap(gT, st('FINALE',{
     x:CX, y:tpY+FINAL_H+26, 'text-anchor':'middle',
     'font-size':17, fill:C.navyText, 'font-weight':900, 'letter-spacing':4,
