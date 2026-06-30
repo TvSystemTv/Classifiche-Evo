@@ -440,10 +440,21 @@ function buildSVG(data) {
   const medalSize = 90;
   const medalY = finY + FINAL_H + blockGap;
 
+  // Immagine medaglia: 1200x680 (disco ritagliato dal nastro), centro circa a
+  // cx=600/1200=50%, cy=340/680=50%, raggio ~350/680≈51.5% dell'altezza.
+  // Clip circolare per eliminare gli angoli bianchi residui dell'immagine sorgente.
+  const medalImgAspect = 1200/680;
+  const medalImgW = medalSize * medalImgAspect;
+  const medalImgX = CX - medalImgW/2;
+  const medalClipId = 'medalClip';
+  ap(defs, ap(se('clipPath',{id:medalClipId}),
+    se('circle',{cx:CX, cy:medalY+medalSize/2, r:medalSize/2})
+  ));
   svg.appendChild(se('image',{
-    href:'assets/bronze.jpeg',
-    x:CX-medalSize/2, y:medalY, width:medalSize, height:medalSize,
-    preserveAspectRatio:'xMidYMid meet'
+    href:'assets/bronze.png',
+    x:medalImgX, y:medalY, width:medalImgW, height:medalSize,
+    preserveAspectRatio:'xMidYMid slice',
+    'clip-path':`url(#${medalClipId})`
   }));
 
   const medalLabelY = medalY + medalSize + 30;
