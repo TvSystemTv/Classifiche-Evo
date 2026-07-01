@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-01T11:42:00Z",
+  "lastUpdated": "2026-07-01T19:14:22Z",
   "groups": [
     {
       "name": "Group A",
@@ -739,9 +739,9 @@
           "flag": "https://flagcdn.com/w40/cd.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
-        "winner": null,
+        "homeScore": 2,
+        "awayScore": 1,
+        "winner": "England",
         "datetime": "2026-07-01T12:00:00"
       },
       {
@@ -964,10 +964,10 @@
           "placeholder": null
         },
         "away": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 80"
+          "name": "England",
+          "code": "GB-ENG",
+          "flag": "https://flagcdn.com/w40/gb-eng.png",
+          "placeholder": null
         },
         "homeScore": null,
         "awayScore": null,
