@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-06-30T18:23:59Z",
+  "lastUpdated": "2026-07-01T11:42:00Z",
   "groups": [
     {
       "name": "Group A",
@@ -682,9 +682,9 @@
           "flag": "https://flagcdn.com/w40/se.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
-        "winner": null,
+        "homeScore": 3,
+        "awayScore": 0,
+        "winner": "France",
         "datetime": "2026-06-30T17:00:00"
       },
       {
@@ -701,9 +701,9 @@
           "flag": "https://flagcdn.com/w40/no.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
-        "winner": null,
+        "homeScore": 1,
+        "awayScore": 2,
+        "winner": "Norway",
         "datetime": "2026-06-30T12:00:00"
       },
       {
@@ -720,9 +720,9 @@
           "flag": "https://flagcdn.com/w40/ec.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
-        "winner": null,
+        "homeScore": 2,
+        "awayScore": 0,
+        "winner": "Mexico",
         "datetime": "2026-06-30T19:00:00"
       },
       {
@@ -901,16 +901,16 @@
       {
         "matchNumber": 89,
         "home": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 74"
+          "name": "Paraguay",
+          "code": "PY",
+          "flag": "https://flagcdn.com/w40/py.png",
+          "placeholder": null
         },
         "away": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 77"
+          "name": "France",
+          "code": "FR",
+          "flag": "https://flagcdn.com/w40/fr.png",
+          "placeholder": null
         },
         "homeScore": null,
         "awayScore": null,
@@ -926,10 +926,10 @@
           "placeholder": null
         },
         "away": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 75"
+          "name": "Morocco",
+          "code": "MA",
+          "flag": "https://flagcdn.com/w40/ma.png",
+          "placeholder": null
         },
         "homeScore": null,
         "awayScore": null,
@@ -945,10 +945,10 @@
           "placeholder": null
         },
         "away": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 78"
+          "name": "Norway",
+          "code": "NO",
+          "flag": "https://flagcdn.com/w40/no.png",
+          "placeholder": null
         },
         "homeScore": null,
         "awayScore": null,
@@ -958,10 +958,10 @@
       {
         "matchNumber": 92,
         "home": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 79"
+          "name": "Mexico",
+          "code": "MX",
+          "flag": "https://flagcdn.com/w40/mx.png",
+          "placeholder": null
         },
         "away": {
           "name": null,
