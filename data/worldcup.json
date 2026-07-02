@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-01T19:14:22Z",
+  "lastUpdated": "2026-07-02T10:19:56Z",
   "groups": [
     {
       "name": "Group A",
@@ -758,9 +758,9 @@
           "flag": "https://flagcdn.com/w40/ba.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
-        "winner": null,
+        "homeScore": 2,
+        "awayScore": 0,
+        "winner": "USA",
         "datetime": "2026-07-01T17:00:00"
       },
       {
@@ -777,8 +777,8 @@
           "flag": "https://flagcdn.com/w40/sn.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
+        "homeScore": 2,
+        "awayScore": 2,
         "winner": null,
         "datetime": "2026-07-01T13:00:00"
       },
@@ -996,16 +996,16 @@
       {
         "matchNumber": 94,
         "home": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 81"
+          "name": "USA",
+          "code": "US",
+          "flag": "https://flagcdn.com/w40/us.png",
+          "placeholder": null
         },
         "away": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 82"
+          "name": "Belgium",
+          "code": "BE",
+          "flag": "https://flagcdn.com/w40/be.png",
+          "placeholder": null
         },
         "homeScore": null,
         "awayScore": null,
