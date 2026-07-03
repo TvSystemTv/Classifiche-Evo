@@ -365,9 +365,9 @@ function pathConn(g, d) {
 }
 function colLabel(g, label, cx, y) {
   ap(g,
-    st(label,{x:cx,y,'text-anchor':'middle','font-size':28,
-      fill:C.navyText,'font-weight':900,'letter-spacing':3.5,
-      stroke:'rgba(255,255,255,0.5)','stroke-width':0.8})
+    st(label,{x:cx,y,'text-anchor':'middle','font-size':36,
+      fill:'#ffffff','font-weight':900,'letter-spacing':3.5,
+      stroke:'rgba(0,0,0,0.9)','stroke-width':1})
   );
 }
 
@@ -408,7 +408,7 @@ function buildSVG(data) {
   ap(svg, gL, gB, gT);
 
   // ── Etichette fase ──────────────────────────────────────────
-  const LY = 100;
+  const LY = 85;
   colLabel(gT,'OTTAVI',     X.r16L+BOX_W/2, LY);
   colLabel(gT,'QUARTI',     X.qfL +BOX_W/2, LY);
   colLabel(gT,'SEMIFINALI', X.sfL +BOX_W/2, LY);
