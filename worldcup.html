@@ -36,6 +36,15 @@
 <script>
 'use strict';
 
+/* ══════════════════════════════════════════════════════════════
+   FIFA World Cup 2026 — Tabellone dagli OTTAVI (Round of 16).
+   I Sedicesimi non vengono disegnati: la base dell'albero sono gli
+   ottavi (4 match per lato). Questo raddoppia lo spazio verticale
+   per ogni box → bandiere e nomi più grandi e leggibili.
+   round_of_32 nel JSON viene ignorato; se un ottavo non è ancora
+   determinato mostra il placeholder "Vincente ...".
+   ══════════════════════════════════════════════════════════════ */
+
 const C = {
   gold:     '#c9a84c',
   gold2:    '#f0d878',
@@ -63,63 +72,81 @@ function se(tag, a={}) {
 function st(text, a={}) { const e=se('text',a); e.textContent=text; return e; }
 function ap(p,...ch) { for(const c of ch) if(c) p.appendChild(c); return p; }
 
+// ── Risoluzione dei "genitori" di un match ──────────────────────
+// Tollerante ai formati: "Vincente Match 89", "Winner match 89"
+// (FIFA/openfootball, m minuscola) e "Vincente M89". Se il match è
+// già giocato e il placeholder è stato sostituito dal nome squadra,
+// si risale al genitore confrontando il winner del round precedente.
+function refFromPlaceholder(ph) {
+  const mm = (ph || '').match(/\b[Mm](?:atch)?\s*(\d+)/);
+  return mm ? parseInt(mm[1], 10) : null;
+}
+function findOriginNum(side, prevByNum) {
+  const r = refFromPlaceholder(side?.placeholder);
+  if (r !== null) return r;
+  if (side?.name) {
+    for (const numStr in prevByNum) {
+      if (prevByNum[numStr].winner === side.name) return parseInt(numStr, 10);
+    }
+  }
+  return null;
+}
+function parentNums(m, prevByNum) {
+  return ['home','away']
+    .map(s => findOriginNum(m[s], prevByNum))
+    .filter(n => n !== null);
+}
+
+// ── Ordine degli Ottavi derivato dall'albero (top-down) ─────────
+// La geometria a slot fissi funziona solo se round_of_16 è in ordine
+// "ad albero" (slot 0-1 alimentano lo stesso quarto, ecc.). Non ci si
+// fida dell'ordine dell'array: lo deriviamo con una DFS in-order dalla
+// Finale scendendo per i veri genitori. Indipendente dall'ordine dei dati.
+function computeR16Order(b) {
+  const by = a => { const o = {}; (a || []).forEach(m => o[m.matchNumber] = m); return o; };
+  const R16 = by(b.round_of_16), QF = by(b.quarter_finals), SF = by(b.semi_finals);
+  const leaves = [];
+  const dfsQF = m => parentNums(m, R16).forEach(n => { if (R16[n]) leaves.push(n); });
+  const dfsSF = m => parentNums(m, QF ).forEach(n => { if (QF[n])  dfsQF(QF[n]); });
+  if (b.final) parentNums(b.final, SF).forEach(n => { if (SF[n]) dfsSF(SF[n]); });
+  (b.round_of_16 || []).forEach(m => {
+    if (!leaves.includes(m.matchNumber)) leaves.push(m.matchNumber);
+  });
+  return leaves;
+}
+
 // ── Layout ────────────────────────────────────────────────────
 const VW=1920, VH=1080, CX=960;
-const BOX_W=178, BOX_H=96, ROW_H=48;
-const FLAG_R=19;
-const TOP_PAD=58, BOT_PAD=14;
-const SLOT_H = Math.floor((VH - TOP_PAD - BOT_PAD) / 8);
+const BOX_W=216, BOX_H=132, ROW_H=66;
+const FLAG_R=26;
+const TOP_PAD=72, BOT_PAD=24;
+const SLOT_H = Math.floor((VH - TOP_PAD - BOT_PAD) / 4);  // 4 slot per lato
 
-const FINAL_W = 240;
-const FINAL_H = 86;
-const WINNER_W = 250;
-const WINNER_H = 58;
+const FINAL_W = 264;
+const FINAL_H = 100;
+const WINNER_W = 280;
+const WINNER_H = 66;
 
+// 3 colonne per lato (Ottavi, Quarti, Semifinali) + blocco centrale.
 const X = {
-  r32L: 14,
-  r16L: 216,
-  qfL:  418,
-  sfL:  620,
+  r16L: 24,
+  qfL:  292,
+  sfL:  560,
   fin:  CX - FINAL_W/2,
-  sfR:  VW - 620 - BOX_W,
-  qfR:  VW - 418 - BOX_W,
-  r16R: VW - 216 - BOX_W,
-  r32R: VW - 14  - BOX_W,
+  sfR:  VW - 560 - BOX_W,
+  qfR:  VW - 292 - BOX_W,
+  r16R: VW - 24  - BOX_W,
 };
 
 function slotY(i)  { return TOP_PAD + i*SLOT_H + Math.floor((SLOT_H-BOX_H)/2); }
 function slotCY(i) { return slotY(i) + BOX_H/2; }
 
-// ── Riordino ad albero binario per POSIZIONE REALE ──────────────
-// L'array del JSON non è garantito in ordine "binario pulito" (qf[1] può
-// alimentare da r16[4]+r16[5] invece che da r16[2]+r16[3]). Per evitare
-// sovrapposizioni nel disegno, riordiniamo ogni round in modo che ogni
-// coppia consecutiva (0+1, 2+3, ...) corrisponda davvero ai due match che
-// alimentano lo stesso match del round successivo. L'ordinamento si basa
-// sulla posizione minima dei "genitori" nel round precedente, risolta
-// seguendo i veri matchNumber nei placeholder o nei winner.
-function originMatchNums(m, prevByNum) {
-  const refs = [];
-  for (const side of ['home','away']) {
-    const ph = m[side]?.placeholder || '';
-    const mm = ph.match(/Match (\d+)/);
-    if (mm) { refs.push(parseInt(mm[1],10)); continue; }
-    const name = m[side]?.name;
-    if (name) {
-      for (const numStr in prevByNum) {
-        if (prevByNum[numStr].winner === name) { refs.push(parseInt(numStr,10)); break; }
-      }
-    }
-  }
-  return refs;
-}
-
+// ── Riordino ad albero per POSIZIONE REALE ──────────────────────
 function reorderRound(round, prevRound, prevPosMap) {
   const prevByNum = {};
   prevRound.forEach(m => { prevByNum[m.matchNumber] = m; });
-
   const keyed = round.map(m => {
-    const refs = originMatchNums(m, prevByNum);
+    const refs = parentNums(m, prevByNum);
     const positions = refs.map(r => prevPosMap[r]).filter(p => p !== undefined);
     const key = positions.length ? Math.min(...positions) : 999;
     return { key, m };
@@ -128,35 +155,28 @@ function reorderRound(round, prevRound, prevPosMap) {
   return keyed.map(k => k.m);
 }
 
-function buildOrderedRounds(r32, r16, qf, sf) {
-  // R32 resta nell'ordine originale (è già la base fissa, 16 slot)
-  const r32pos = {};
-  r32.forEach((m,i) => { r32pos[m.matchNumber] = i; });
-
-  const r16ord = reorderRound(r16, r32, r32pos);
+function buildOrderedRounds(r16, qf, sf) {
+  // r16 arriva già in ordine-albero (computeR16Order in buildSVG)
   const r16pos = {};
-  r16ord.forEach((m,i) => { r16pos[m.matchNumber] = i; });
-
-  const qford = reorderRound(qf, r16ord, r16pos);
+  r16.forEach((m,i) => { r16pos[m.matchNumber] = i; });
+  const qford = reorderRound(qf, r16, r16pos);
   const qfpos = {};
   qford.forEach((m,i) => { qfpos[m.matchNumber] = i; });
-
   const sford = reorderRound(sf, qford, qfpos);
-
-  return { r32, r16: r16ord, qf: qford, sf: sford };
+  return { r16, qf: qford, sf: sford };
 }
 
-// ── Box match VERTICALE (2 righe impilate) — usato per R32..SF ──
+// ── Box match VERTICALE (2 righe impilate) — Ottavi..Semifinali ──
 function drawBox(parent, defs, match, bx, by) {
   const winner = match?.winner || null;
   const homeWin = winner && match?.home?.name && winner===match.home.name;
   const awayWin = winner && match?.away?.name && winner===match.away.name;
 
   ap(parent,
-    se('rect',{x:bx,y:by,width:BOX_W,height:BOX_H,rx:7,
+    se('rect',{x:bx,y:by,width:BOX_W,height:BOX_H,rx:9,
       fill:C.boxBg,
       stroke:(homeWin||awayWin)?C.borderW:C.border,
-      'stroke-width':(homeWin||awayWin)?2.2:1.2}),
+      'stroke-width':(homeWin||awayWin)?2.4:1.3}),
     se('line',{x1:bx,y1:by+ROW_H,x2:bx+BOX_W,y2:by+ROW_H,
       stroke:'rgba(255,255,255,0.12)','stroke-width':1})
   );
@@ -172,16 +192,16 @@ function drawBox(parent, defs, match, bx, by) {
 
     if (isWin) ap(g, se('rect',{x:bx,y:ry,width:BOX_W,height:ROW_H,fill:C.winBg}));
 
-    const fcx = bx + 10 + FLAG_R;
+    const fcx = bx + 12 + FLAG_R;
     const fcy = ry + ROW_H/2;
     const cid = 'f'+(++_cn);
     ap(defs, ap(se('clipPath',{id:cid}), se('circle',{cx:fcx,cy:fcy,r:FLAG_R})));
 
     if (name) {
       ap(g,
-        se('circle',{cx:fcx,cy:fcy,r:FLAG_R+2,
+        se('circle',{cx:fcx,cy:fcy,r:FLAG_R+2.5,
           fill:'none', stroke:isWin?C.gold:C.border,
-          'stroke-width':isWin?2.5:1.3}),
+          'stroke-width':isWin?2.8:1.4}),
         ap(se('g',{'clip-path':`url(#${cid})`}), (()=>{
           const img=se('image',{
             href:flag, x:fcx-FLAG_R, y:fcy-FLAG_R,
@@ -194,18 +214,18 @@ function drawBox(parent, defs, match, bx, by) {
       );
     } else {
       ap(g,
-        se('circle',{cx:fcx,cy:fcy,r:FLAG_R,fill:'rgba(255,255,255,0.05)',stroke:C.muted,'stroke-width':1.3}),
-        st('?',{x:fcx,y:fcy+6,'text-anchor':'middle','font-size':18,fill:C.muted,'font-weight':800})
+        se('circle',{cx:fcx,cy:fcy,r:FLAG_R,fill:'rgba(255,255,255,0.05)',stroke:C.muted,'stroke-width':1.4}),
+        st('?',{x:fcx,y:fcy+8,'text-anchor':'middle','font-size':24,fill:C.muted,'font-weight':800})
       );
     }
 
-    const tx = bx + 10 + FLAG_R*2 + 16;
-    const tw = BOX_W - (10+FLAG_R*2+16) - 8;
+    const tx = bx + 12 + FLAG_R*2 + 14;
+    const tw = BOX_W - (12+FLAG_R*2+14) - 8;
     const tcid = 'n'+(++_cn);
     ap(defs, ap(se('clipPath',{id:tcid}), se('rect',{x:tx,y:ry,width:tw,height:ROW_H})));
     ap(g, st(name||ph, {
-      x:tx, y:ry+ROW_H/2+7,
-      'font-size': name?20:16,
+      x:tx, y:ry+ROW_H/2+8,
+      'font-size': name?23:18,
       fill: name?(isWin?C.gold2:C.white):C.gold2,
       'font-weight': name?(isWin?800:600):800,
       'clip-path':`url(#${tcid})`
@@ -226,14 +246,14 @@ function drawHBox(parent, defs, match, bx, by) {
   const halfW = FINAL_W/2;
 
   ap(parent,
-    se('rect',{x:bx,y:by,width:FINAL_W,height:FINAL_H,rx:8,
+    se('rect',{x:bx,y:by,width:FINAL_W,height:FINAL_H,rx:10,
       fill:C.boxBg,
       stroke:(homeWin||awayWin)?C.borderW:C.border,
-      'stroke-width':(homeWin||awayWin)?2.4:1.4}),
+      'stroke-width':(homeWin||awayWin)?2.6:1.5}),
     se('line',{x1:bx+halfW,y1:by,x2:bx+halfW,y2:by+FINAL_H,
       stroke:'rgba(255,255,255,0.14)','stroke-width':1}),
     st('VS',{x:bx+halfW,y:by+FINAL_H/2+6,'text-anchor':'middle',
-      'font-size':14,fill:'rgba(255,255,255,0.30)','font-weight':800})
+      'font-size':15,fill:'rgba(255,255,255,0.30)','font-weight':800})
   );
 
   function drawSide(team, side, isWin, isElim) {
@@ -248,7 +268,7 @@ function drawHBox(parent, defs, match, bx, by) {
 
     if (isWin) ap(g, se('rect',{x:cx0,y:by,width:halfW,height:FINAL_H,fill:C.winBg}));
 
-    const fcy = by + FINAL_H/2 - 12;
+    const fcy = by + FINAL_H/2 - 14;
     const fcx = cx0 + halfW/2;
     const cid = 'hf'+(++_cn);
     ap(defs, ap(se('clipPath',{id:cid}), se('circle',{cx:fcx,cy:fcy,r:FLAG_R+2})));
@@ -256,7 +276,7 @@ function drawHBox(parent, defs, match, bx, by) {
     if (name) {
       ap(g,
         se('circle',{cx:fcx,cy:fcy,r:FLAG_R+4,fill:'none',
-          stroke:isWin?C.gold:C.border,'stroke-width':isWin?2.5:1.3}),
+          stroke:isWin?C.gold:C.border,'stroke-width':isWin?2.8:1.4}),
         ap(se('g',{'clip-path':`url(#${cid})`}),(()=>{
           const img=se('image',{href:flag,x:fcx-FLAG_R-2,y:fcy-FLAG_R-2,
             width:(FLAG_R+2)*2,height:(FLAG_R+2)*2,preserveAspectRatio:'xMidYMid slice'});
@@ -266,17 +286,17 @@ function drawHBox(parent, defs, match, bx, by) {
       );
     } else {
       ap(g,
-        se('circle',{cx:fcx,cy:fcy,r:FLAG_R+2,fill:'rgba(255,255,255,0.05)',stroke:C.muted,'stroke-width':1.3}),
-        st('?',{x:fcx,y:fcy+6,'text-anchor':'middle','font-size':18,fill:C.muted,'font-weight':800})
+        se('circle',{cx:fcx,cy:fcy,r:FLAG_R+2,fill:'rgba(255,255,255,0.05)',stroke:C.muted,'stroke-width':1.4}),
+        st('?',{x:fcx,y:fcy+8,'text-anchor':'middle','font-size':24,fill:C.muted,'font-weight':800})
       );
     }
 
     const tcid = 'ht'+(++_cn);
-    ap(defs, ap(se('clipPath',{id:tcid}), se('rect',{x:cx0+4,y:by+FINAL_H-26,width:halfW-8,height:22})));
+    ap(defs, ap(se('clipPath',{id:tcid}), se('rect',{x:cx0+4,y:by+FINAL_H-30,width:halfW-8,height:24})));
     ap(g, st(name||ph,{
-      x:fcx, y:by+FINAL_H-10,
+      x:fcx, y:by+FINAL_H-12,
       'text-anchor':'middle',
-      'font-size': name?16:13,
+      'font-size': name?17:14,
       fill: name?(isWin?C.gold2:C.white):C.gold2,
       'font-weight': 800,
       'clip-path':`url(#${tcid})`
@@ -295,31 +315,31 @@ function drawWinnerBox(parent, defs, y, teamName, teamFlag, accentColor) {
   const by = y;
 
   ap(parent, se('rect',{
-    x:bx, y:by, width:WINNER_W, height:WINNER_H, rx:8,
+    x:bx, y:by, width:WINNER_W, height:WINNER_H, rx:10,
     fill:'rgba(8,8,24,0.85)',
     stroke: teamName ? accentColor : C.border,
-    'stroke-width': teamName ? 2.6 : 1.4
+    'stroke-width': teamName ? 2.8 : 1.5
   }));
 
   if (teamName) {
-    const fcx = bx + 34, fcy = by + WINNER_H/2;
+    const fcx = bx + 38, fcy = by + WINNER_H/2;
     const cid = 'wb'+(++_cn);
     ap(defs, ap(se('clipPath',{id:cid}), se('circle',{cx:fcx,cy:fcy,r:FLAG_R+1})));
     ap(parent,
-      se('circle',{cx:fcx,cy:fcy,r:FLAG_R+3,fill:'none',stroke:accentColor,'stroke-width':2.5}),
+      se('circle',{cx:fcx,cy:fcy,r:FLAG_R+3,fill:'none',stroke:accentColor,'stroke-width':2.8}),
       ap(se('g',{'clip-path':`url(#${cid})`}),(()=>{
         const img=se('image',{href:teamFlag||FLAG_FB,x:fcx-FLAG_R-1,y:fcy-FLAG_R-1,
           width:(FLAG_R+1)*2,height:(FLAG_R+1)*2,preserveAspectRatio:'xMidYMid slice'});
         img.setAttribute('onerror',`this.setAttribute('href','${FLAG_FB}')`);
         return img;
       })()),
-      st(teamName,{x:fcx+34,y:fcy+7,'font-size':22,fill:accentColor==C.gold?C.gold2:C.bronze2,'font-weight':900})
+      st(teamName,{x:fcx+38,y:fcy+8,'font-size':24,fill:accentColor==C.gold?C.gold2:C.bronze2,'font-weight':900})
     );
   } else {
     ap(parent,
-      se('circle',{cx:bx+34,cy:by+WINNER_H/2,r:FLAG_R+1,fill:'rgba(255,255,255,0.05)',stroke:C.muted,'stroke-width':1.3}),
-      st('?',{x:bx+34,y:by+WINNER_H/2+6,'text-anchor':'middle','font-size':18,fill:C.muted,'font-weight':800}),
-      st('Da determinare',{x:bx+68,y:by+WINNER_H/2+6,'font-size':16,fill:C.muted,'font-style':'italic','font-weight':600})
+      se('circle',{cx:bx+38,cy:by+WINNER_H/2,r:FLAG_R+1,fill:'rgba(255,255,255,0.05)',stroke:C.muted,'stroke-width':1.4}),
+      st('?',{x:bx+38,y:by+WINNER_H/2+8,'text-anchor':'middle','font-size':24,fill:C.muted,'font-weight':800}),
+      st('Da determinare',{x:bx+76,y:by+WINNER_H/2+8,'font-size':18,fill:C.muted,'font-style':'italic','font-weight':600})
     );
   }
 }
@@ -327,39 +347,47 @@ function drawWinnerBox(parent, defs, y, teamName, teamFlag, accentColor) {
 // ── Connettori con bordo rosso e centro blu notte ────────────────
 function hline(g, x1, x2, y) {
   ap(g,
-    se('line',{x1,y1:y,x2,y2:y,stroke:C.lineEdge,'stroke-width':5.5,'stroke-linecap':'round'}),
-    se('line',{x1,y1:y,x2,y2:y,stroke:C.line,'stroke-width':2.6,'stroke-linecap':'round'})
+    se('line',{x1,y1:y,x2,y2:y,stroke:C.lineEdge,'stroke-width':6,'stroke-linecap':'round'}),
+    se('line',{x1,y1:y,x2,y2:y,stroke:C.line,'stroke-width':2.8,'stroke-linecap':'round'})
   );
 }
 function vline(g, x, y1, y2) {
   ap(g,
-    se('line',{x1:x,y1,x2:x,y2,stroke:C.lineEdge,'stroke-width':5.5,'stroke-linecap':'round'}),
-    se('line',{x1:x,y1,x2:x,y2,stroke:C.line,'stroke-width':2.6,'stroke-linecap':'round'})
+    se('line',{x1:x,y1,x2:x,y2,stroke:C.lineEdge,'stroke-width':6,'stroke-linecap':'round'}),
+    se('line',{x1:x,y1,x2:x,y2,stroke:C.line,'stroke-width':2.8,'stroke-linecap':'round'})
   );
 }
 function pathConn(g, d) {
   ap(g,
-    se('path',{d, stroke:C.lineEdge,'stroke-width':5.5,fill:'none','stroke-linecap':'round'}),
-    se('path',{d, stroke:C.line,'stroke-width':2.6,fill:'none','stroke-linecap':'round'})
+    se('path',{d, stroke:C.lineEdge,'stroke-width':6,fill:'none','stroke-linecap':'round','stroke-linejoin':'round'}),
+    se('path',{d, stroke:C.line,'stroke-width':2.8,fill:'none','stroke-linecap':'round','stroke-linejoin':'round'})
   );
 }
 function colLabel(g, label, cx, y) {
   ap(g,
-    st(label,{x:cx,y,'text-anchor':'middle','font-size':26,
+    st(label,{x:cx,y,'text-anchor':'middle','font-size':28,
       fill:C.navyText,'font-weight':900,'letter-spacing':3.5,
-      stroke:'rgba(255,255,255,0.5)','stroke-width':0.7})
+      stroke:'rgba(255,255,255,0.5)','stroke-width':0.8})
   );
 }
 
 // ── SVG principale ────────────────────────────────────────────
 function buildSVG(data) {
+  // Ottavi in ordine-albero PRIMA di tutto → disegno indipendente
+  // dall'ordine dell'array nel JSON.
+  const r16raw = data.bracket.round_of_16 || [];
+  const r16byNum0 = {};
+  r16raw.forEach(m => { r16byNum0[m.matchNumber] = m; });
+  const r16sorted = computeR16Order(data.bracket)
+    .map(n => r16byNum0[n])
+    .filter(Boolean);
+
   const ord = buildOrderedRounds(
-    data.bracket.round_of_32    || [],
-    data.bracket.round_of_16    || [],
+    r16sorted,
     data.bracket.quarter_finals || [],
     data.bracket.semi_finals    || []
   );
-  const r32 = ord.r32, r16 = ord.r16, qf = ord.qf, sf = ord.sf;
+  const r16 = ord.r16, qf = ord.qf, sf = ord.sf;
   const tp  = data.bracket.third_place;
   const fin = data.bracket.final;
 
@@ -380,34 +408,26 @@ function buildSVG(data) {
   ap(svg, gL, gB, gT);
 
   // ── Etichette fase ──────────────────────────────────────────
-  const LY = TOP_PAD - 18;
-  colLabel(gT,'SEDICESIMI', X.r32L+BOX_W/2, LY);
+  const LY = 100;
   colLabel(gT,'OTTAVI',     X.r16L+BOX_W/2, LY);
   colLabel(gT,'QUARTI',     X.qfL +BOX_W/2, LY);
   colLabel(gT,'SEMIFINALI', X.sfL +BOX_W/2, LY);
   colLabel(gT,'SEMIFINALI', X.sfR +BOX_W/2, LY);
   colLabel(gT,'QUARTI',     X.qfR +BOX_W/2, LY);
   colLabel(gT,'OTTAVI',     X.r16R+BOX_W/2, LY);
-  colLabel(gT,'SEDICESIMI', X.r32R+BOX_W/2, LY);
 
-  // ══ Geometria fissa per POSIZIONE (8 slot R32 per lato, ordine ──
-  // già riordinato a monte per leggibilità tramite buildOrderedRounds),
-  // ma le LINEE seguono i VERI matchNumber genitori (anche quando il
-  // genitore reale non è nello slot "adiacente pulito" — in quel caso
-  // la linea diventa un percorso ad angolo che raggiunge la Y esatta) ──
-
+  // ── Geometria per posizione. Le linee seguono i veri genitori;
+  // se un genitore è a Y diversa la linea diventa un percorso ad
+  // angolo (orizz-vert-orizz). ──
   function pairCY(getCY, i) { return (getCY(2*i) + getCY(2*i+1)) / 2; }
-  const r16CYL = i => pairCY(slotCY, i);
+  const r16CYL = i => slotCY(i);
   const qfCYL  = i => pairCY(r16CYL, i);
   const sfLY   = (qfCYL(0)+qfCYL(1))/2;
-  const r16CYR = i => pairCY(slotCY, i);
+  const r16CYR = i => slotCY(i);
   const qfCYR  = i => pairCY(r16CYR, i);
   const sfRY   = (qfCYR(0)+qfCYR(1))/2;
 
-  // Mappa matchNumber -> {x: colonna del box, y: centro reale di disegno}
   const posByNum = {};
-  r32.slice(0,8).forEach((m,i) => { posByNum[m.matchNumber] = {x:X.r32L+BOX_W, y:slotCY(i)}; });
-  r32.slice(8,16).forEach((m,i) => { posByNum[m.matchNumber] = {x:X.r32R,      y:slotCY(i)}; });
   r16.slice(0,4).forEach((m,i) => { posByNum[m.matchNumber] = {x:X.r16L+BOX_W, y:r16CYL(i)}; });
   r16.slice(4,8).forEach((m,i) => { posByNum[m.matchNumber] = {x:X.r16R,      y:r16CYR(i)}; });
   qf.slice(0,2).forEach((m,i) => { posByNum[m.matchNumber] = {x:X.qfL+BOX_W, y:qfCYL(i)}; });
@@ -415,31 +435,13 @@ function buildSVG(data) {
   if (sf[0]) posByNum[sf[0].matchNumber] = {x:X.sfL+BOX_W, y:sfLY};
   if (sf[1]) posByNum[sf[1].matchNumber] = {x:X.sfR,      y:sfRY};
 
-  // Trova i veri matchNumber genitori di un match (placeholder o winner risolto)
-  function findOriginNum(side, prevByNum) {
-    const ph = side?.placeholder || '';
-    const mm = ph.match(/Match (\d+)/);
-    if (mm) return parseInt(mm[1],10);
-    if (side?.name) {
-      for (const numStr in prevByNum) {
-        if (prevByNum[numStr].winner === side.name) return parseInt(numStr,10);
-      }
-    }
-    return null;
-  }
-
-  // Disegna le 2 linee in ENTRATA di un match (dai suoi 2 veri genitori),
-  // verso il bordo sinistro (o destro, per il lato R) del box di destinazione.
-  // Se il genitore è a Y diversa, traccia un path ad angolo (orizz-vert-orizz).
   function drawParentLines(match, prevByNum, destX, isRightSide) {
     const refs = ['home','away'].map(s => findOriginNum(match[s], prevByNum)).filter(n => n !== null);
     refs.forEach(refNum => {
       const parent = posByNum[refNum];
       if (!parent) return;
-      const startX = parent.x;
-      const startY = parent.y;
-      const endX = destX;
-      const endY = posByNum[match.matchNumber].y;
+      const startX = parent.x, startY = parent.y;
+      const endX = destX, endY = posByNum[match.matchNumber].y;
       if (Math.abs(startY - endY) < 1) {
         hline(gL, isRightSide?endX:startX, isRightSide?startX:endX, startY);
       } else {
@@ -449,83 +451,68 @@ function buildSVG(data) {
     });
   }
 
-  // ── LATO SINISTRO ════════════════════════════════════════════
-  for (let i=0;i<8;i++) drawBox(gB, defs, r32[i], X.r32L, slotY(i));
-
-  const r32ByNum = {}; r32.forEach(m => { r32ByNum[m.matchNumber] = m; });
   const r16ByNum = {}; r16.forEach(m => { r16ByNum[m.matchNumber] = m; });
   const qfByNum  = {}; qf.forEach(m => { qfByNum[m.matchNumber] = m; });
 
-  for (let i=0;i<4;i++) {
-    const m = r16[i];
-    drawBox(gB, defs, m, X.r16L, r16CYL(i)-BOX_H/2);
-    drawParentLines(m, r32ByNum, X.r16L, false);
-  }
-
+  // ── LATO SINISTRO ════════════════════════════════════════════
+  for (let i=0;i<4;i++) drawBox(gB, defs, r16[i], X.r16L, r16CYL(i)-BOX_H/2);
   for (let i=0;i<2;i++) {
     const m = qf[i];
     drawBox(gB, defs, m, X.qfL, qfCYL(i)-BOX_H/2);
     drawParentLines(m, r16ByNum, X.qfL, false);
   }
-
   if (sf[0]) {
     drawBox(gB, defs, sf[0], X.sfL, sfLY-BOX_H/2);
     drawParentLines(sf[0], qfByNum, X.sfL, false);
   }
 
   // ── LATO DESTRO ══════════════════════════════════════════════
-  for (let i=0;i<8;i++) drawBox(gB, defs, r32[8+i], X.r32R, slotY(i));
-
-  for (let i=0;i<4;i++) {
-    const m = r16[4+i];
-    drawBox(gB, defs, m, X.r16R, r16CYR(i)-BOX_H/2);
-    drawParentLines(m, r32ByNum, X.r16R+BOX_W, true);
-  }
-
+  for (let i=0;i<4;i++) drawBox(gB, defs, r16[4+i], X.r16R, r16CYR(i)-BOX_H/2);
   for (let i=0;i<2;i++) {
     const m = qf[2+i];
     drawBox(gB, defs, m, X.qfR, qfCYR(i)-BOX_H/2);
     drawParentLines(m, r16ByNum, X.qfR+BOX_W, true);
   }
-
   if (sf[1]) {
     drawBox(gB, defs, sf[1], X.sfR, sfRY-BOX_H/2);
     drawParentLines(sf[1], qfByNum, X.sfR+BOX_W, true);
   }
 
   // ══ CENTRO ══════════════════════════════════════════════════
+  // La finale è centrata verticalmente sulle semifinali (finCY = sfLY),
+  // così i due connettori Semifinale→Finale sono orizzontali e puliti.
   const finBX = CX - FINAL_W/2;
+  const finCY = sfLY;
+  const finY  = finCY - FINAL_H/2;
 
-  // Trofeo, in alto, ingrandito, nulla sopra
-  const tW = 130, tH = 250;
-  const trophyY = 26;
+  // Trofeo + label + box campione, impilati SOPRA la finale
+  const champBoxY   = finY - 50 - WINNER_H;
+  const champLabelY = champBoxY - 24;
+  const tW = 120, tH = 168;
+  const trophyY = champLabelY - 30 - tH;
   svg.appendChild(se('image',{href:'assets/trophy.png',x:CX-tW/2,y:trophyY,width:tW,height:tH,
     preserveAspectRatio:'xMidYMid meet'}));
 
-  const champLabelY = trophyY + tH + 36;
   ap(gT, st('CAMPIONE DEL MONDO',{
     x:CX, y:champLabelY, 'text-anchor':'middle',
-    'font-size':28, fill:C.gold, 'font-weight':900, 'letter-spacing':5,
+    'font-size':30, fill:C.gold, 'font-weight':900, 'letter-spacing':5,
     stroke:C.navyText, 'stroke-width':1.4, 'paint-order':'stroke'
   }));
 
-  const champBoxY = champLabelY + 20;
   drawWinnerBox(gB, defs, champBoxY, fin?.winner || null,
     fin?.winner ? (fin.winner===fin.home?.name ? fin.home.flag : fin.away?.flag) : null,
     C.gold);
 
-  const finCY = champBoxY + WINNER_H + 50 + FINAL_H/2;
-  const finY  = finCY - FINAL_H/2;
   vline(gL, CX, champBoxY+WINNER_H, finY);
-
   drawHBox(gB, defs, fin, finBX, finY);
 
   ap(gT, st('FINALE',{
-    x:CX, y:finY+FINAL_H+26, 'text-anchor':'middle',
-    'font-size':17, fill:C.navyText, 'font-weight':900, 'letter-spacing':4,
-    stroke:'rgba(255,255,255,0.5)','stroke-width':0.5
+    x:CX, y:finY+FINAL_H+30, 'text-anchor':'middle',
+    'font-size':19, fill:C.navyText, 'font-weight':900, 'letter-spacing':4,
+    stroke:'rgba(255,255,255,0.5)','stroke-width':0.6
   }));
 
+  // Connettori Semifinale → Finale (orizzontali: sfLY === finCY === sfRY)
   if (Math.abs(sfLY - finCY) > 1) {
     const midX = (X.sfL+BOX_W + finBX)/2;
     pathConn(gL, `M${X.sfL+BOX_W},${sfLY} H${midX} V${finCY} H${finBX}`);
@@ -539,10 +526,9 @@ function buildSVG(data) {
     hline(gL, finBX+FINAL_W, X.sfR, finCY);
   }
 
-  // ── Blocco 3° posto ─────────────────────────────────────────
-  const blockGap = 90;
-  const medalSize = 90;
-  const medalY = finY + FINAL_H + blockGap;
+  // ── Blocco 3° posto, SOTTO la finale ────────────────────────
+  const medalSize = 84;
+  const medalY = finY + FINAL_H + 56;
 
   const medalImgAspect = 1200/680;
   const medalImgW = medalSize * medalImgAspect;
@@ -558,10 +544,10 @@ function buildSVG(data) {
     'clip-path':`url(#${medalClipId})`
   }));
 
-  const medalLabelY = medalY + medalSize + 30;
+  const medalLabelY = medalY + medalSize + 28;
   ap(gT, st('TERZO POSTO',{
     x:CX, y:medalLabelY, 'text-anchor':'middle',
-    'font-size':22, fill:C.bronze, 'font-weight':900, 'letter-spacing':4,
+    'font-size':24, fill:C.bronze, 'font-weight':900, 'letter-spacing':4,
     stroke:C.navyText, 'stroke-width':1.2, 'paint-order':'stroke'
   }));
 
@@ -573,13 +559,12 @@ function buildSVG(data) {
   const tpCY = medalBoxY + WINNER_H + 40 + FINAL_H/2;
   const tpY  = tpCY - FINAL_H/2;
   vline(gL, CX, medalBoxY+WINNER_H, tpY);
-
   drawHBox(gB, defs, tp, finBX, tpY);
 
   ap(gT, st('FINALE',{
-    x:CX, y:tpY+FINAL_H+26, 'text-anchor':'middle',
-    'font-size':17, fill:C.navyText, 'font-weight':900, 'letter-spacing':4,
-    stroke:'rgba(255,255,255,0.5)','stroke-width':0.5
+    x:CX, y:tpY+FINAL_H+30, 'text-anchor':'middle',
+    'font-size':19, fill:C.navyText, 'font-weight':900, 'letter-spacing':4,
+    stroke:'rgba(255,255,255,0.5)','stroke-width':0.6
   }));
 
   return svg;
