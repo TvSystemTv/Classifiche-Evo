@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-03T03:33:26Z",
+  "lastUpdated": "2026-07-03T09:23:14Z",
   "groups": [
     {
       "name": "Group A",
@@ -834,9 +834,9 @@
           "flag": "https://flagcdn.com/w40/dz.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
-        "winner": null,
+        "homeScore": 2,
+        "awayScore": 0,
+        "winner": "Switzerland",
         "datetime": "2026-07-02T20:00:00"
       },
       {
@@ -1034,10 +1034,10 @@
       {
         "matchNumber": 96,
         "home": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 85"
+          "name": "Switzerland",
+          "code": "CH",
+          "flag": "https://flagcdn.com/w40/ch.png",
+          "placeholder": null
         },
         "away": {
           "name": null,
