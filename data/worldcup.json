@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-02T19:34:58Z",
+  "lastUpdated": "2026-07-03T03:33:26Z",
   "groups": [
     {
       "name": "Group A",
@@ -796,9 +796,9 @@
           "flag": "https://flagcdn.com/w40/hr.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
-        "winner": null,
+        "homeScore": 2,
+        "awayScore": 1,
+        "winner": "Portugal",
         "datetime": "2026-07-02T19:00:00"
       },
       {
@@ -815,9 +815,9 @@
           "flag": "https://flagcdn.com/w40/at.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
-        "winner": null,
+        "homeScore": 3,
+        "awayScore": 0,
+        "winner": "Spain",
         "datetime": "2026-07-02T12:00:00"
       },
       {
@@ -977,16 +977,16 @@
       {
         "matchNumber": 93,
         "home": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 83"
+          "name": "Portugal",
+          "code": "PT",
+          "flag": "https://flagcdn.com/w40/pt.png",
+          "placeholder": null
         },
         "away": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 84"
+          "name": "Spain",
+          "code": "ES",
+          "flag": "https://flagcdn.com/w40/es.png",
+          "placeholder": null
         },
         "homeScore": null,
         "awayScore": null,
