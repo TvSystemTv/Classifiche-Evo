@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-04T03:26:18Z",
+  "lastUpdated": "2026-07-04T08:41:40Z",
   "groups": [
     {
       "name": "Group A",
@@ -872,9 +872,9 @@
           "flag": "https://flagcdn.com/w40/gh.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
-        "winner": null,
+        "homeScore": 1,
+        "awayScore": 0,
+        "winner": "Colombia",
         "datetime": "2026-07-03T20:30:00"
       },
       {
@@ -1040,10 +1040,10 @@
           "placeholder": null
         },
         "away": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 87"
+          "name": "Colombia",
+          "code": "CO",
+          "flag": "https://flagcdn.com/w40/co.png",
+          "placeholder": null
         },
         "homeScore": null,
         "awayScore": null,
