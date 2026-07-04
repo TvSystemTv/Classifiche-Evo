@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-04T13:39:29Z",
+  "lastUpdated": "2026-07-04T19:18:22Z",
   "groups": [
     {
       "name": "Group A",
@@ -931,9 +931,9 @@
           "flag": "https://flagcdn.com/w40/ma.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
-        "winner": null,
+        "homeScore": 0,
+        "awayScore": 3,
+        "winner": "Morocco",
         "datetime": "2026-07-04T12:00:00"
       },
       {
@@ -1061,10 +1061,10 @@
           "placeholder": "Vincente Match 89"
         },
         "away": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 90"
+          "name": "Morocco",
+          "code": "MA",
+          "flag": "https://flagcdn.com/w40/ma.png",
+          "placeholder": null
         },
         "homeScore": null,
         "awayScore": null,
