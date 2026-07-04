@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-03T19:26:56Z",
+  "lastUpdated": "2026-07-04T03:26:18Z",
   "groups": [
     {
       "name": "Group A",
@@ -853,8 +853,8 @@
           "flag": "https://flagcdn.com/w40/cv.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
+        "homeScore": 1,
+        "awayScore": 1,
         "winner": null,
         "datetime": "2026-07-03T18:00:00"
       },
@@ -891,8 +891,8 @@
           "flag": "https://flagcdn.com/w40/eg.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
+        "homeScore": 1,
+        "awayScore": 1,
         "winner": null,
         "datetime": "2026-07-03T13:00:00"
       }
