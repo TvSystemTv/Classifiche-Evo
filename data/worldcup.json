@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-04T08:41:40Z",
+  "lastUpdated": "2026-07-04T13:39:29Z",
   "groups": [
     {
       "name": "Group A",
@@ -1015,16 +1015,16 @@
       {
         "matchNumber": 95,
         "home": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 86"
+          "name": "Argentina",
+          "code": "AR",
+          "flag": "https://flagcdn.com/w40/ar.png",
+          "placeholder": null
         },
         "away": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 88"
+          "name": "Egypt",
+          "code": "EG",
+          "flag": "https://flagcdn.com/w40/eg.png",
+          "placeholder": null
         },
         "homeScore": null,
         "awayScore": null,
