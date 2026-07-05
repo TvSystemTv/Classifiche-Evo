@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-04T19:18:22Z",
+  "lastUpdated": "2026-07-05T03:42:28Z",
   "groups": [
     {
       "name": "Group A",
@@ -912,9 +912,9 @@
           "flag": "https://flagcdn.com/w40/fr.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
-        "winner": null,
+        "homeScore": 0,
+        "awayScore": 1,
+        "winner": "France",
         "datetime": "2026-07-04T17:00:00"
       },
       {
@@ -1055,10 +1055,10 @@
       {
         "matchNumber": 97,
         "home": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 89"
+          "name": "France",
+          "code": "FR",
+          "flag": "https://flagcdn.com/w40/fr.png",
+          "placeholder": null
         },
         "away": {
           "name": "Morocco",
