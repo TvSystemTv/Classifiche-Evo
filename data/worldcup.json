@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-05T19:22:15Z",
+  "lastUpdated": "2026-07-06T03:51:35Z",
   "groups": [
     {
       "name": "Group A",
@@ -950,9 +950,9 @@
           "flag": "https://flagcdn.com/w40/no.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
-        "winner": null,
+        "homeScore": 1,
+        "awayScore": 2,
+        "winner": "Norway",
         "datetime": "2026-07-05T16:00:00"
       },
       {
@@ -969,9 +969,9 @@
           "flag": "https://flagcdn.com/w40/gb-eng.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
-        "winner": null,
+        "homeScore": 2,
+        "awayScore": 3,
+        "winner": "England",
         "datetime": "2026-07-05T18:00:00"
       },
       {
@@ -1093,16 +1093,16 @@
       {
         "matchNumber": 99,
         "home": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 91"
+          "name": "Norway",
+          "code": "NO",
+          "flag": "https://flagcdn.com/w40/no.png",
+          "placeholder": null
         },
         "away": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 92"
+          "name": "England",
+          "code": "GB-ENG",
+          "flag": "https://flagcdn.com/w40/gb-eng.png",
+          "placeholder": null
         },
         "homeScore": null,
         "awayScore": null,
