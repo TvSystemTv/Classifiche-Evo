@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-07T14:42:32Z",
+  "lastUpdated": "2026-07-07T19:59:40Z",
   "groups": [
     {
       "name": "Group A",
@@ -1026,9 +1026,9 @@
           "flag": "https://flagcdn.com/w40/eg.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
-        "winner": null,
+        "homeScore": 3,
+        "awayScore": 2,
+        "winner": "Argentina",
         "datetime": "2026-07-07T12:00:00"
       },
       {
@@ -1112,10 +1112,10 @@
       {
         "matchNumber": 100,
         "home": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 95"
+          "name": "Argentina",
+          "code": "AR",
+          "flag": "https://flagcdn.com/w40/ar.png",
+          "placeholder": null
         },
         "away": {
           "name": null,
