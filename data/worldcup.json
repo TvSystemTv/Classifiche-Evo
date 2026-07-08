@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-08T08:33:47Z",
+  "lastUpdated": "2026-07-08T14:20:28Z",
   "groups": [
     {
       "name": "Group A",
@@ -1118,10 +1118,10 @@
           "placeholder": null
         },
         "away": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 96"
+          "name": "Switzerland",
+          "code": "CH",
+          "flag": "https://flagcdn.com/w40/ch.png",
+          "placeholder": null
         },
         "homeScore": null,
         "awayScore": null,
