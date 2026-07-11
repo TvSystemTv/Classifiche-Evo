@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-10T19:37:02Z",
+  "lastUpdated": "2026-07-11T02:51:26Z",
   "groups": [
     {
       "name": "Group A",
@@ -1085,9 +1085,9 @@
           "flag": "https://flagcdn.com/w40/be.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
-        "winner": null,
+        "homeScore": 2,
+        "awayScore": 1,
+        "winner": "Spain",
         "datetime": "2026-07-10T12:00:00"
       },
       {
@@ -1139,10 +1139,10 @@
           "placeholder": null
         },
         "away": {
-          "name": null,
-          "code": null,
-          "flag": null,
-          "placeholder": "Vincente Match 98"
+          "name": "Spain",
+          "code": "ES",
+          "flag": "https://flagcdn.com/w40/es.png",
+          "placeholder": null
         },
         "homeScore": null,
         "awayScore": null,
