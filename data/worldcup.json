@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-14T19:23:31Z",
+  "lastUpdated": "2026-07-15T02:41:57Z",
   "groups": [
     {
       "name": "Group A",
@@ -1144,9 +1144,9 @@
           "flag": "https://flagcdn.com/w40/es.png",
           "placeholder": null
         },
-        "homeScore": null,
-        "awayScore": null,
-        "winner": null,
+        "homeScore": 0,
+        "awayScore": 2,
+        "winner": "Spain",
         "datetime": "2026-07-14T14:00:00"
       },
       {
@@ -1172,10 +1172,10 @@
     "third_place": {
       "matchNumber": 103,
       "home": {
-        "name": null,
-        "code": null,
-        "flag": null,
-        "placeholder": "Perdente Match 101"
+        "name": "France",
+        "code": "FR",
+        "flag": "https://flagcdn.com/w40/fr.png",
+        "placeholder": null
       },
       "away": {
         "name": null,
@@ -1191,10 +1191,10 @@
     "final": {
       "matchNumber": 104,
       "home": {
-        "name": null,
-        "code": null,
-        "flag": null,
-        "placeholder": "Vincente Match 101"
+        "name": "Spain",
+        "code": "ES",
+        "flag": "https://flagcdn.com/w40/es.png",
+        "placeholder": null
       },
       "away": {
         "name": null,
