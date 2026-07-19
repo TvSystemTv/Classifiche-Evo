@@ -1,5 +1,5 @@
 {
-  "lastUpdated": "2026-07-18T19:09:05Z",
+  "lastUpdated": "2026-07-19T02:57:32Z",
   "groups": [
     {
       "name": "Group A",
@@ -1183,9 +1183,9 @@
         "flag": "https://flagcdn.com/w40/gb-eng.png",
         "placeholder": null
       },
-      "homeScore": null,
-      "awayScore": null,
-      "winner": null,
+      "homeScore": 4,
+      "awayScore": 6,
+      "winner": "England",
       "datetime": "2026-07-18T17:00:00"
     },
     "final": {
